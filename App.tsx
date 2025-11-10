@@ -1,45 +1,40 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import {Image, StyleSheet, Text, View} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import RootNavigator from './src/navigations/rootNavigator';
+import { logo } from './src/assets';
+const App = () => {
+    const [splashVisible,setSplashVisible]=useState(true);
+      useEffect(() => {
+    const timer = setTimeout(() => {
+      setSplashVisible(false);
+    }, 2000); // 2 seconds
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+    return () => clearTimeout(timer);
+  }, []);
+  let Splash_Screen = (
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <View style={styles.splash}>  
+      <Image source={logo} style={styles.logo} /> 
+    {/* <ImageBackground
+      source={Splash}
+      resizeMode="cover"
+      style={styles.splash}></ImageBackground> */}
+      </View>
   );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+  return splashVisible?Splash_Screen:<RootNavigator />;
+};
 
 export default App;
+
+const styles = StyleSheet.create({
+    splash:{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  logo:{
+    height:200,  
+    width:200,
+    resizeMode:'contain'
+  }
+});
