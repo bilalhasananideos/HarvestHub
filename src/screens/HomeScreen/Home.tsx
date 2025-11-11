@@ -1,655 +1,3 @@
-//  import { StyleSheet, Text, TouchableOpacity, View, Image, Pressable, ScrollView, FlatList } from 'react-native';
-//  import React from 'react';
-//  import { hp, scale, wp } from '../../theme/responsive';
-// import CacheImage from '../../components/CacheImage';
-// import { cart, scope, star, location, truck } from '../../assets';
-// import { colors } from '../../theme/colors';
-// import { typography } from '../../theme/typography';
-
-// // Demo data
-// const demoData = {
-//   categories: [
-//     { id: '1', name: 'Vegetables', icon: '🥬' },
-//     { id: '2', name: 'Fruits', icon: '🍎' },
-//     { id: '3', name: 'Dairy', icon: '🥛' },
-//     { id: '4', name: 'Meat', icon: '🥩' },
-//     { id: '5', name: 'Grains', icon: '🌾' },
-//     { id: '6', name: 'Herbs', icon: '🌿' },
-//   ],
-//   featuredFarms: [
-//     {
-//       id: '1',
-//       name: 'Green Valley Farms',
-//       image: 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=400',
-//       rating: 4.8,
-//       distance: '2.5 km',
-//       specialty: 'Organic Vegetables',
-//       deliveryTime: '30-45 min',
-//     },
-//     {
-//       id: '2',
-//       name: 'Sunrise Orchard',
-//       image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400',
-//       rating: 4.6,
-//       distance: '3.2 km',
-//       specialty: 'Fresh Fruits',
-//       deliveryTime: '25-40 min',
-//     },
-//     {
-//       id: '3',
-//       name: 'Happy Cows Dairy',
-//       image: 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=400',
-//       rating: 4.9,
-//       distance: '1.8 km',
-//       specialty: 'Fresh Dairy',
-//       deliveryTime: '20-35 min',
-//     },
-//   ],
-//   trendingProducts: [
-//     {
-//       id: '1',
-//       name: 'Organic Tomatoes',
-//       price: '$4.99',
-//       originalPrice: '$6.99',
-//       image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300',
-//       farm: 'Green Valley Farms',
-//       discount: '30% OFF',
-//     },
-//     {
-//       id: '2',
-//       name: 'Fresh Strawberries',
-//       price: '$7.99',
-//       originalPrice: '$9.99',
-//       image: 'https://images.unsplash.com/photo-1543528176-61b239494933?w=300',
-//       farm: 'Sunrise Orchard',
-//       discount: '20% OFF',
-//     },
-//     {
-//       id: '3',
-//       name: 'Farm Fresh Milk',
-//       price: '$3.49',
-//       originalPrice: '$4.49',
-//       image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300',
-//       farm: 'Happy Cows Dairy',
-//       discount: '22% OFF',
-//     },
-//   ],
-//   recentOrders: [
-//     {
-//       id: '1',
-//       items: 'Organic Vegetables Bundle',
-//       date: '2 days ago',
-//       status: 'Delivered',
-//       total: '$24.99',
-//       image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100',
-//     },
-//     {
-//       id: '2',
-//       items: 'Fresh Fruits Mix',
-//       date: '5 days ago',
-//       status: 'Delivered',
-//       total: '$18.99',
-//       image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=100',
-//     },
-//   ],
-// };
-
-// const Home = ({navigation}: {navigation: any}) => {
-//   const renderCategoryItem = ({ item }: { item: any }) => (
-//     <TouchableOpacity style={styles.categoryCard}>
-//       <Text style={styles.categoryIcon}>{item.icon}</Text>
-//       <Text style={styles.categoryName}>{item.name}</Text>
-//     </TouchableOpacity>
-//   );
-
-//   const renderFarmItem = ({ item }: { item: any }) => (
-//     <TouchableOpacity style={styles.farmCard}>
-//       <CacheImage url={item.image} style={styles.farmImage} />
-//       <View style={styles.farmInfo}>
-//         <Text style={styles.farmName}>{item.name}</Text>
-//         <View style={styles.farmDetails}>
-//           <View style={styles.ratingContainer}>
-//             <Image source={star} style={styles.starIcon} />
-//             <Text style={styles.ratingText}>{item.rating}</Text>
-//           </View>
-//           <View style={styles.distanceContainer}>
-//             <Image source={location} style={styles.locationIcon} />
-//             <Text style={styles.distanceText}>{item.distance}</Text>
-//           </View>
-//         </View>
-//         <Text style={styles.specialtyText}>{item.specialty}</Text>
-//         <View style={styles.deliveryContainer}>
-//           <Image source={truck} style={styles.truckIcon} />
-//           <Text style={styles.deliveryText}>{item.deliveryTime}</Text>
-//         </View>
-//       </View>
-//     </TouchableOpacity>
-//   );
-
-//   const renderProductItem = ({ item }: { item: any }) => (
-//     <TouchableOpacity style={styles.productCard}>
-//       <View style={styles.discountBadge}>
-//         <Text style={styles.discountText}>{item.discount}</Text>
-//       </View>
-//       <CacheImage url={item.image} style={styles.productImage} />
-//       <View style={styles.productInfo}>
-//         <Text style={styles.productName}>{item.name}</Text>
-//         <Text style={styles.productFarm}>{item.farm}</Text>
-//         <View style={styles.priceContainer}>
-//           <Text style={styles.productPrice}>{item.price}</Text>
-//           <Text style={styles.originalPrice}>{item.originalPrice}</Text>
-//         </View>
-//       </View>
-//     </TouchableOpacity>
-//   );
-
-//   const renderOrderItem = ({ item }: { item: any }) => (
-//     <View style={styles.orderCard}>
-//       <CacheImage url={item.image} style={styles.orderImage} />
-//       <View style={styles.orderInfo}>
-//         <Text style={styles.orderItems}>{item.items}</Text>
-//         <Text style={styles.orderDate}>{item.date}</Text>
-//         <Text style={styles.orderTotal}>{item.total}</Text>
-//       </View>
-//       <View style={[styles.statusBadge, item.status === 'Delivered' && styles.statusBadgeDelivered]}>
-//         <Text style={styles.statusText}>{item.status}</Text>
-//       </View>
-//     </View>
-//   );
-
-//   return (
-//     <View style={styles.container}>
-//       {/* Compact Header */}
-//       <View style={styles.headerBg}>
-//         <View style={styles.headerContentCompact}>
-//           <View style={styles.headerRowCompact}>
-//             <CacheImage
-//               url={'https://randomuser.me/api/portraits/men/1.jpg'}
-//               style={styles.avatar}
-//             />
-//             <View style={{ flex: 1, marginLeft: 10 }}>
-//               <Text style={styles.headerTitleCompact}>Hello, Samuel</Text>
-//               <Text style={styles.headerDateCompact}>Mon 16 Sept</Text>
-//             </View>
-//             <TouchableOpacity
-//               style={styles.cartBtn}
-//               onPress={() => navigation.navigate('CartScreen')}
-//             >
-//               <View style={styles.cartBox}>
-//                 <Image source={cart} style={styles.cartIconReal} />
-//                 <View style={styles.cartBadgeReal}>
-//                   <Text style={styles.cartBadgeTextReal}>3</Text>
-//                 </View>
-//               </View>
-//             </TouchableOpacity>
-//           </View>
-//           {/* Search Bar inside header */}
-//           <Pressable
-//             onPress={() => navigation.navigate('SearchScreen')}
-//             style={styles.searchBarContainerCompact}
-//           >
-//             <Image source={scope} style={styles.searchIcon} />
-//             <Text style={styles.searchBarCompact}>Search farms OR browse categories</Text>
-//           </Pressable>
-//         </View>
-//       </View>
-
-//       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-//         {/* Categories Section */}
-//         <View style={styles.section}>
-//           <View style={styles.sectionHeader}>
-//             <Text style={styles.sectionTitle}>What are you looking for?</Text>
-//             {/* <TouchableOpacity>
-//               <Text style={styles.seeAllText}>See all</Text>
-//             </TouchableOpacity> */}
-//           </View>
-//           <FlatList
-//             data={demoData.categories}
-//             numColumns={3}
-//             renderItem={renderCategoryItem}
-//             keyExtractor={(item) => item.id}
-//             showsHorizontalScrollIndicator={false}
-//             contentContainerStyle={styles.categoriesList}
-//           />
-//         </View>
-
-//         {/* Featured Farms */}
-//         <View style={styles.section}>
-//           <View style={styles.sectionHeader}>
-//             <Text style={styles.sectionTitle}>Featured Farms</Text>
-//             <TouchableOpacity>
-//               <Text style={styles.seeAllText}>See all</Text>
-//             </TouchableOpacity>
-//           </View>
-//           <FlatList
-//             data={demoData.featuredFarms}
-//             renderItem={renderFarmItem}
-//             keyExtractor={(item) => item.id}
-//             horizontal
-//             showsHorizontalScrollIndicator={false}
-//             contentContainerStyle={styles.farmsList}
-//           />
-//         </View>
-
-//         {/* Trending Products */}
-//         <View style={styles.section}>
-//           <View style={styles.sectionHeader}>
-//             <Text style={styles.sectionTitle}>Trending Products</Text>
-//             <TouchableOpacity>
-//               <Text style={styles.seeAllText}>See all</Text>
-//             </TouchableOpacity>
-//           </View>
-//           <FlatList
-//             data={demoData.trendingProducts}
-//             renderItem={renderProductItem}
-//             keyExtractor={(item) => item.id}
-//             horizontal
-//             showsHorizontalScrollIndicator={false}
-//             contentContainerStyle={styles.productsList}
-//           />
-//         </View>
-
-//         {/* Recent Orders */}
-//         <View style={styles.section}>
-//           <View style={styles.sectionHeader}>
-//             <Text style={styles.sectionTitle}>Recent Orders</Text>
-//             <TouchableOpacity>
-//               <Text style={styles.seeAllText}>See all</Text>
-//             </TouchableOpacity>
-//           </View>
-//           <FlatList
-//             data={demoData.recentOrders}
-//             renderItem={renderOrderItem}
-//             keyExtractor={(item) => item.id}
-//             contentContainerStyle={styles.ordersList}
-//           />
-//         </View>
-//       </ScrollView>
-//     </View>
-//   );
-// };
-
-// export default Home;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: colors.background.default,
-//   },
-//   content: {
-//     flex: 1,
-//     backgroundColor: colors.background.default,
-//   },
-//   headerBg: {
-//     width: wp('100'),
-//     height: hp('23'),
-//     borderBottomLeftRadius: 40,
-//     borderBottomRightRadius: 40,
-//     overflow: 'hidden',
-//     justifyContent: 'flex-end',
-//     paddingTop: 0,
-//     paddingBottom: 0,
-//     backgroundColor: colors.primary.main,
-//   },
-//   headerContentCompact: {
-//     flex: 1,
-//     justifyContent: 'flex-end',
-//     paddingTop: hp(2),
-//     paddingBottom: hp(1.5),
-//     paddingHorizontal: wp(4),
-//   },
-//   headerRowCompact: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     marginBottom: hp(2),
-//   },
-//   avatar: {
-//     width: wp(15),
-//     height: wp(15),
-//     resizeMode: 'contain',
-//     borderRadius: wp(100),
-//     borderWidth: 2,
-//     borderColor: colors.background.paper,
-//   },
-//   headerTitleCompact: {
-//     color: colors.primary.main,
-//     fontSize: scale(18),
-//     fontFamily: typography.fontFamily.Bold,
-//   },
-//   headerDateCompact: {
-//     color: colors.primary.main,
-//     fontSize: scale(13),
-//     marginTop: hp(0.3),
-//     fontFamily: typography.fontFamily.Regular,
-//     opacity: 0.8,
-//   },
-//   cartBtn: {
-//     marginLeft: wp(2),
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   cartBox: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     backgroundColor: colors.background.paper,
-//     borderRadius: wp(3),
-//     paddingHorizontal: wp(2.5),
-//     paddingVertical: hp(0.8),
-//     minWidth: wp(11),
-//     minHeight: hp(4),
-//     justifyContent: 'center',
-//     shadowColor: colors.overlay.dark,
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//     elevation: 4,
-//   },
-//   cartIconReal: {
-//     width: wp(5.5),
-//     height: wp(5.5),
-//     tintColor: colors.text.primary,
-//   },
-//   cartBadgeReal: {
-//     position: 'absolute',
-//     top: -wp(1.5),
-//     right: -wp(1.5),
-//     backgroundColor: colors.status.error,
-//     borderRadius: wp(2.5),
-//     minWidth: wp(5),
-//     minHeight: wp(5),
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     borderWidth: 2,
-//     borderColor: colors.background.paper,
-//     zIndex: 2,
-//     paddingHorizontal: wp(0.5),
-//   },
-//   cartBadgeTextReal: {
-//     color: colors.text.inverse,
-//     fontSize: scale(11),
-//     fontFamily: typography.fontFamily.Bold,
-//     textAlign: 'center',
-//   },
-//   searchIcon: {
-//     width: wp(5.5),
-//     height: wp(5.5),
-//     tintColor: colors.primary.main,
-//   },
-//   searchBarContainerCompact: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     backgroundColor: 'rgba(255,255,255,0.15)',
-//     borderRadius: wp(6),
-//     paddingHorizontal: wp(4),
-//     marginTop: hp(0.5),
-//     height: hp(6),
-//     borderWidth: 1,
-//     borderColor: 'rgba(255,255,255,0.25)',
-//     marginBottom: hp(0.5),
-//   },
-//   searchBarCompact: {
-//     flex: 1,
-//     color: colors.border.dark,
-//     fontSize: scale(15),
-//     paddingLeft: wp(2),
-//     fontFamily: typography.fontFamily.Regular,
-//   },
-  
-//   // New styles for home content
-//   section: {
-//     marginHorizontal: wp(4),
-//     marginTop: hp(2),
-//   },
-//   sectionHeader: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     marginBottom: hp(1.5),
-//   },
-//   sectionTitle: {
-//     fontSize: scale(20),
-//     fontWeight: 'bold',
-//     color: colors.text.primary,
-//   },
-//   seeAllText: {
-//     fontSize: scale(14),
-//     fontFamily: typography.fontFamily.Medium,
-//     color: colors.primary.main,
-//   },
-//   categoriesList: {
-//     paddingRight: wp(4),
-//   },
-//   categoryCard: {
-//     backgroundColor: colors.background.paper,
-//     borderRadius: wp(4),
-//     padding: wp(3),
-//     marginRight: wp(3),
-//     alignItems: 'center',
-//     minWidth: wp(20),
-//     shadowColor: colors.overlay.light,
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//     elevation: 2,
-//   },
-//   categoryIcon: {
-//     fontSize: scale(24),
-//     marginBottom: hp(0.5),
-//   },
-//   categoryName: {
-//     fontSize: scale(12),
-//     fontFamily: typography.fontFamily.Medium,
-//     color: colors.text.secondary,
-//     textAlign: 'center',
-//   },
-//   farmsList: {
-//     paddingRight: wp(4),
-//   },
-//   farmCard: {
-//     backgroundColor: colors.background.paper,
-//     borderRadius: wp(4),
-//     marginRight: wp(3),
-//     width: wp(70),
-//     shadowColor: colors.overlay.light,
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//     elevation: 2,
-//   },
-//   farmImage: {
-//     width: '100%',
-//     height: hp(15),
-//     borderTopLeftRadius: wp(4),
-//     borderTopRightRadius: wp(4),
-//   },
-//   farmInfo: {
-//     padding: wp(3),
-//   },
-//   farmName: {
-//     fontSize: scale(16),
-//     fontFamily: typography.fontFamily.Bold,
-//     color: colors.text.primary,
-//     marginBottom: hp(0.5),
-//   },
-//   farmDetails: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     marginBottom: hp(0.5),
-//   },
-//   ratingContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   starIcon: {
-//     width: wp(4),
-//     height: wp(4),
-//     tintColor: colors.status.warning,
-//     marginRight: wp(1),
-//   },
-//   ratingText: {
-//     fontSize: scale(14),
-//     fontFamily: typography.fontFamily.Medium,
-//     color: colors.text.secondary,
-//   },
-//   distanceContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   locationIcon: {
-//     width: wp(4),
-//     height: wp(4),
-//     tintColor: colors.text.secondary,
-//     marginRight: wp(1),
-//   },
-//   distanceText: {
-//     fontSize: scale(14),
-//     fontFamily: typography.fontFamily.Medium,
-//     color: colors.text.secondary,
-//   },
-//   specialtyText: {
-//     fontSize: scale(14),
-//     fontFamily: typography.fontFamily.Regular,
-//     color: colors.text.secondary,
-//     marginBottom: hp(0.5),
-//   },
-//   deliveryContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   truckIcon: {
-//     width: wp(4),
-//     height: wp(4),
-//     tintColor: colors.primary.main,
-//     marginRight: wp(1),
-//   },
-//   deliveryText: {
-//     fontSize: scale(13),
-//     fontFamily: typography.fontFamily.Medium,
-//     color: colors.primary.main,
-//   },
-//   productsList: {
-//     paddingRight: wp(4),
-//   },
-//   productCard: {
-//     backgroundColor: colors.background.paper,
-//     borderRadius: wp(4),
-//     marginRight: wp(3),
-//     width: wp(40),
-//     shadowColor: colors.overlay.light,
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//     elevation: 2,
-//   },
-//   discountBadge: {
-//     position: 'absolute',
-//     top: wp(2),
-//     right: wp(2),
-//     backgroundColor: colors.status.error,
-//     borderRadius: wp(2),
-//     paddingHorizontal: wp(2),
-//     paddingVertical: hp(0.3),
-//     zIndex: 1,
-//   },
-//   discountText: {
-//     fontSize: scale(11),
-//     fontFamily: typography.fontFamily.Bold,
-//     color: colors.text.inverse,
-//   },
-//   productImage: {
-//     width: '100%',
-//     height: hp(12),
-//     borderTopLeftRadius: wp(4),
-//     borderTopRightRadius: wp(4),
-//   },
-//   productInfo: {
-//     padding: wp(2.5),
-//   },
-//   productName: {
-//     fontSize: scale(14),
-//     fontFamily: typography.fontFamily.Medium,
-//     color: colors.text.primary,
-//     marginBottom: hp(0.3),
-//   },
-//   productFarm: {
-//     fontSize: scale(12),
-//     fontFamily: typography.fontFamily.Regular,
-//     color: colors.text.secondary,
-//     marginBottom: hp(0.5),
-//   },
-//   priceContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   productPrice: {
-//     fontSize: scale(16),
-//     fontFamily: typography.fontFamily.Bold,
-//     color: colors.status.error,
-//     marginRight: wp(1),
-//   },
-//   originalPrice: {
-//     fontSize: scale(12),
-//     fontFamily: typography.fontFamily.Regular,
-//     color: colors.text.secondary,
-//     textDecorationLine: 'line-through',
-//   },
-//   ordersList: {
-//     paddingBottom: hp(2),
-//   },
-//   orderCard: {
-//     backgroundColor: colors.background.paper,
-//     borderRadius: wp(4),
-//     padding: wp(3),
-//     marginBottom: hp(1.5),
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     shadowColor: colors.overlay.light,
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//     elevation: 2,
-//   },
-//   orderImage: {
-//     width: wp(15),
-//     height: wp(15),
-//     borderRadius: wp(3),
-//     marginRight: wp(3),
-//   },
-//   orderInfo: {
-//     flex: 1,
-//   },
-//   orderItems: {
-//     fontSize: scale(14),
-//     fontFamily: typography.fontFamily.Medium,
-//     color: colors.text.primary,
-//     marginBottom: hp(0.3),
-//   },
-//   orderDate: {
-//     fontSize: scale(12),
-//     fontFamily: typography.fontFamily.Regular,
-//     color: colors.text.secondary,
-//     marginBottom: hp(0.3),
-//   },
-//   orderTotal: {
-//     fontSize: scale(14),
-//     fontFamily: typography.fontFamily.Bold,
-//     color: colors.text.primary,
-//   },
-//   statusBadge: {
-//     backgroundColor: colors.status.warning,
-//     borderRadius: wp(2),
-//     paddingHorizontal: wp(2),
-//     paddingVertical: hp(0.3),
-//   },
-//   statusBadgeDelivered: {
-//     backgroundColor: colors.status.success,
-//   },
-//   statusText: {
-//     fontSize: scale(11),
-//     fontFamily: typography.fontFamily.Bold,
-//     color: colors.text.inverse,
-//   },
-// });
 import { StyleSheet, Text, TouchableOpacity, View, Image, Pressable, ScrollView, FlatList } from 'react-native';
 import React from 'react';
 import { fontSizes, hp, scale, wp } from '../../theme/responsive';
@@ -698,12 +46,7 @@ const demoData = {
 };
 
 const Home = ({navigation}: {navigation: any}) => {
-  const renderCategoryItem = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.categoryCard}>
-      <CacheImage url={item.image} style={styles.categoryImage} />
-      <Text style={styles.categoryName}>{item.name}</Text>
-    </TouchableOpacity>
-  );
+ 
 
   const renderProductItem = ({ item }: { item: any }) => (
     <TouchableOpacity style={styles.productCard}>
@@ -712,26 +55,7 @@ const Home = ({navigation}: {navigation: any}) => {
     </TouchableOpacity>
   );
 
-  const renderFarmerItem = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.farmerCard}>
-      <CacheImage url={item.image} style={styles.farmerImage} />
-      <View style={styles.farmerInfo}>
-        <Text style={styles.farmerName}>{item.name}</Text>
-        <View style={styles.farmerRating}>
-          <Image source={star} style={styles.starIconSmall} />
-          <Text style={styles.ratingText}>{item.rating} ({item.reviews})</Text>
-        </View>
-        <View style={styles.farmerDistance}>
-          <Image source={location} style={styles.locationIconSmall} />
-          <Text style={styles.distanceText}>{item.distance}</Text>
-        </View>
-        <View style={styles.farmerVisit}>
-          <View style={styles.checkIcon} />
-          <Text style={styles.visitText}>Farm visit available</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+ 
 
   return (
     <View style={styles.container}>
@@ -740,7 +64,7 @@ const Home = ({navigation}: {navigation: any}) => {
          <View style={styles.headerContentCompact}>
            <View style={styles.headerRowCompact}>
              <CacheImage
-               url={'https:randomuser.me/api/portraits/men/1.jpg'}
+               url={'https://randomuser.me/api/portraits/men/1.jpg'}
                style={styles.avatar}
              />
              <View style={{ flex: 1, marginLeft: 10 }}>
@@ -749,7 +73,7 @@ const Home = ({navigation}: {navigation: any}) => {
              </View>
              <TouchableOpacity
                style={styles.cartBtn}
-               onPress={() => navigation.navigate('CartScreen')}
+               onPress={() => navigation.navigate('Profile3')}
              >
                <View style={styles.cartBox}>
                  <Image source={cart} style={styles.cartIconReal} />
@@ -801,10 +125,10 @@ const Home = ({navigation}: {navigation: any}) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Explore Farmers</Text>
-            <TouchableOpacity style={styles.sortBtn}>
+            {/* <TouchableOpacity style={styles.sortBtn}>
               <Text style={styles.sortText}>Sort</Text>
               <Text style={styles.sortArrow}>▼</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           <View style={styles.farmersGrid}>
             {demoData.farmers.map((item) => (
@@ -940,7 +264,7 @@ const styles = StyleSheet.create({
   },
   searchBarCompact: {
     flex: 1,
-    color: colors.border.dark,
+    color: colors.text.primary,
     fontSize: scale(15),
     paddingLeft: wp(2),
     fontFamily: typography.fontFamily.Regular,
@@ -1113,8 +437,9 @@ const styles = StyleSheet.create({
     marginBottom: hp(0.8),
   },
   categoryName: {
-    fontSize: scale(12),
+    fontSize: fontSizes.fs12,
     fontFamily: typography.fontFamily.Medium,
+    fontWeight:'500',
     color: '#333',
     textAlign: 'center',
   },
@@ -1141,8 +466,9 @@ const styles = StyleSheet.create({
     marginBottom: hp(0.8),
   },
   productName: {
-    fontSize: scale(12),
+    fontSize: fontSizes.fs12,
     fontFamily: typography.fontFamily.Medium,
+    fontWeight:'500',
     color: '#333',
     textAlign: 'center',
   },
@@ -1171,7 +497,8 @@ const styles = StyleSheet.create({
     padding: wp(3),
   },
   farmerName: {
-    fontSize: scale(14),
+        fontSize: fontSizes.fs12,
+    fontWeight:'500',
     fontFamily: typography.fontFamily.Bold,
     color: '#333',
     marginBottom: hp(0.8),

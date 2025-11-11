@@ -134,7 +134,7 @@ const SettingScreen = ({ navigation }: any) => {
       <Text style={styles.sectionTitle}>Account</Text>
       <Pressable
         style={styles.item}
-        onPress={() => navigation.navigate('Profile')}
+        onPress={() => navigation.navigate('AllOrdersScreen')}
       >
         <View style={styles.imageContainer}>
           <Image source={myorder} style={styles.itemIcon} />

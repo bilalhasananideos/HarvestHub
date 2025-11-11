@@ -19,6 +19,7 @@ import SettingScreen from '../screens/SettingScreen';
 import Home from '../screens/HomeScreen/Home';
 import Profile from '../screens/Profile';
 import ChatScreen from '../screens/ChatScreen';
+import SearchScreen from '../screens/SearchScreen';
 
 
 
@@ -80,6 +81,14 @@ function MybottomTabs() {
           options={{
             ...tabarComponent(messagefill, message, 'Chat'),
             headerShown: true,
+          }}
+        />
+        <Tab.Screen
+          name="SearchScreen"
+          component={SearchScreen}
+          options={{
+            ...tabarComponent(searchfill, search, 'Search'),
+            headerShown: false,
           }}
         />
   
