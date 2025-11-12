@@ -38,6 +38,7 @@ export { default as settingFill } from './images/settingfill.png';
 export { default as headerbg } from './images/headerbg.png';
 export { default as homeheader } from './images/homeheader.png';
 export { default as arrowleft } from './images/arrowleft.png';
+export { default as arrowRight } from './images/arrow-right.png';
 export { default as cart } from './images/cart.png';
 export { default as scope } from './images/scope.png';
 export { default as filter } from './images/filter.png';

@@ -20,6 +20,7 @@ import Home from '../screens/HomeScreen/Home';
 import Profile from '../screens/Profile';
 import ChatScreen from '../screens/ChatScreen';
 import SearchScreen from '../screens/SearchScreen';
+import CartScreen from '../screens/CartScreen';
 
 
 
@@ -94,10 +95,11 @@ function MybottomTabs() {
   
 
       <Tab.Screen
-        name="Profile3"
-        component={Profile} 
+        name="Cart"
+        component={CartScreen}
         options={{
           ...tabarComponent(bagfill, bag, 'Cart'),
+          headerShown: true,
         }}
       />
       <Tab.Screen
