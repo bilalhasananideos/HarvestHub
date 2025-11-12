@@ -77,7 +77,7 @@ function MybottomTabs() {
         }}
       />
         <Tab.Screen
-          name="Profile2"
+          name="ChatScreen"
           component={ChatScreen}
           options={{
             ...tabarComponent(messagefill, message, 'Chat'),

@@ -2,6 +2,8 @@ import {Image, StyleSheet, Text, View} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import RootNavigator from './src/navigations/rootNavigator';
 import { logo } from './src/assets';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 const App = () => {
     const [splashVisible,setSplashVisible]=useState(true);
       useEffect(() => {
@@ -21,7 +23,7 @@ const App = () => {
       style={styles.splash}></ImageBackground> */}
       </View>
   );
-  return splashVisible?Splash_Screen:<RootNavigator />;
+  return splashVisible?Splash_Screen:<GestureHandlerRootView><RootNavigator /></GestureHandlerRootView>;
 };
 
 export default App;

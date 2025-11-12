@@ -35,7 +35,7 @@ const initialItems: CartItem[] = [
     unitSuffix: '/kg',
     unitPrice: 43.33,
     quantity: 1,
-    step: 3,
+    step: 1,
     imageUri:
       'https://images.unsplash.com/photo-1437750769465-301382cdf094?auto=format&fit=crop&w=200&q=80',
   },
@@ -46,7 +46,7 @@ const initialItems: CartItem[] = [
     unitSuffix: ' /pcs',
     unitPrice: 52.86,
     quantity: 1,
-    step: 12,
+    step: 1,
     imageUri:
       'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?auto=format&fit=crop&w=200&q=80',
   },
@@ -68,7 +68,7 @@ const initialItems: CartItem[] = [
     unitSuffix: '/kg',
     unitPrice: 39.61,
     quantity: 1,
-    step: 2,
+    step: 1,
     imageUri:
       'https://images.unsplash.com/photo-1580915411954-282cb1b0d780?auto=format&fit=crop&w=200&q=80',
   },

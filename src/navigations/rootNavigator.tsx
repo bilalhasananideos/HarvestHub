@@ -10,6 +10,7 @@ import AuthNavigator from './authNavigator';
 import SearchScreen from '../screens/SearchScreen';
 import ProductDetailScreen from '../screens/ProductDetail';
 import AllOrdersScreen from '../screens/AllOrdersScreen';
+import MessageScreen from '../screens/MessageScreen';
 
 
 
@@ -58,6 +59,7 @@ export default function RootNavigator() {
         <Stack.Screen  name="SearchScreen" component={SearchScreen} options={{ headerShown: false }} />
         <Stack.Screen  name="ProductDetailScreen" component={ProductDetailScreen} options={headerOptions('Product Detail')} />
         <Stack.Screen  name="AllOrdersScreen" component={AllOrdersScreen} options={headerOptions('My Orders')} />
+        <Stack.Screen  name="MessageScreen" component={MessageScreen} options={headerOptions('Message')} />
       </Stack.Navigator>
          )}
     </NavigationContainer>

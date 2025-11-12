@@ -33,6 +33,10 @@ export const scale = (size: number) => size / fontScale;
 export const typography = {
   // Font Families
   fontFamily: {
+    Light: Platform.select({
+      ios: 'WorkSans-Light',
+      android: 'WorkSans-Light',
+    }),
     Regular: Platform.select({
       ios: 'WorkSans-Regular',
       android: 'WorkSans-Regular',

@@ -73,7 +73,7 @@ const Home = ({navigation}: {navigation: any}) => {
              </View>
              <TouchableOpacity
                style={styles.cartBtn}
-               onPress={() => navigation.navigate('Profile3')}
+               onPress={() => navigation.navigate('Cart')}
              >
                <View style={styles.cartBox}>
                  <Image source={cart} style={styles.cartIconReal} />
@@ -109,7 +109,7 @@ const Home = ({navigation}: {navigation: any}) => {
         </View>
 
         {/* Popular Products */}
-        <View style={styles.section}>
+        <View style={[styles.section,{borderTopWidth:1,borderBottomWidth:1,borderColor:'rgba(217, 217, 217, 1)',paddingVertical:15},]}>
           <Text style={styles.sectionTitle}>Popular products</Text>
           <FlatList
             data={demoData.popularProducts}
@@ -120,6 +120,7 @@ const Home = ({navigation}: {navigation: any}) => {
             contentContainerStyle={styles.productsList}
           />
         </View>
+
 
         {/* Explore Farmers */}
         <View style={styles.section}>
@@ -164,6 +165,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border.light,
   },
     headerBg: {
     width: wp('100'),
@@ -248,7 +254,7 @@ const styles = StyleSheet.create({
   searchIcon: {
     width: wp(5.5),
     height: wp(5.5),
-    tintColor: colors.primary.main,
+    tintColor:'white'
   },
   searchBarContainerCompact: {
     flexDirection: 'row',
@@ -264,8 +270,8 @@ const styles = StyleSheet.create({
   },
   searchBarCompact: {
     flex: 1,
-    color: colors.text.primary,
-    fontSize: scale(15),
+    color: 'white',
+    fontSize: fontSizes.fs15,
     paddingLeft: wp(2),
     fontFamily: typography.fontFamily.Regular,
   },
@@ -378,6 +384,7 @@ const styles = StyleSheet.create({
   section: {
     marginTop: hp(2.5),
     paddingHorizontal: wp(4),
+
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -387,7 +394,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: fontSizes.fs18,
-    fontFamily: typography.fontFamily.Bold,
+    fontFamily: typography.fontFamily.SemiBold,
     color: '#333',
     fontWeight:'700',
     marginBottom: hp(1.5),
@@ -445,6 +452,7 @@ const styles = StyleSheet.create({
   },
   productsList: {
     paddingRight: wp(4),
+    paddingVertical:1
   },
   productCard: {
     width: wp(24),

@@ -58,6 +58,7 @@ export { default as tos } from './images/tos.png';
 export { default as helpfaq } from './images/helpfaq.png';
 export { default as password } from './images/password.png';
 export { default as edit } from './images/edit.png';
+export { default as deleteaccount } from './images/deleteaccount.png';
 
 //OrdersScreen
 export { default as truckicon } from './images/truckicon.png';
