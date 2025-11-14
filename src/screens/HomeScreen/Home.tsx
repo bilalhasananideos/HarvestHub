@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View, Image, Pressable, ScrollView, FlatList } from 'react-native';
-import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, Image, Pressable, ScrollView, FlatList, NativeScrollEvent, NativeSyntheticEvent, Animated } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
 import { fontSizes, hp, scale, wp } from '../../theme/responsive';
 import CacheImage from '../../components/CacheImage';
 import { cart, scope, star, location, truck } from '../../assets';
@@ -42,11 +42,110 @@ const demoData = {
       distance: '2.6 miles away',
       visitAvailable: true,
     },
+    {
+      id: '3',
+      name: 'Jason Smith Farm',
+      image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400',
+      rating: 4.5,
+      reviews: '204+',
+      distance: '2.6 miles away',
+      visitAvailable: true,
+    },
+    {
+      id: '4',
+      name: 'Jason Smith Farm',
+      image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400',
+      rating: 4.5,
+      reviews: '204+',
+      distance: '2.6 miles away',
+      visitAvailable: true,
+    },
+    {
+      id: '5',
+      name: 'Jason Smith Farm',
+      image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400',
+      rating: 4.5,
+      reviews: '204+',
+      distance: '2.6 miles away',
+      visitAvailable: true,
+    },
   ],
 };
 
 const Home = ({navigation}: {navigation: any}) => {
- 
+  const exploreFarmersRef = useRef<View>(null);
+  const [exploreFarmersY, setExploreFarmersY] = useState(0);
+  const [stickyHeaderVisible, setStickyHeaderVisible] = useState(false);
+  
+  // Animated values for smooth transitions
+  const headerHeight = useRef(new Animated.Value(hp('22'))).current;
+  const headerContentOpacity = useRef(new Animated.Value(1)).current;
+  const exploreFarmersOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (stickyHeaderVisible) {
+      // Animate header to small size and show "Explore Farmers"
+      Animated.parallel([
+        Animated.timing(headerHeight, {
+          toValue: hp('15'),
+          duration: 300,
+          useNativeDriver: false,
+        }),
+        Animated.timing(headerContentOpacity, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(exploreFarmersOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Animate header back to large size
+      Animated.parallel([
+        Animated.timing(headerHeight, {
+          toValue: hp('22'),
+          duration: 300,
+          useNativeDriver: false,
+        }),
+        Animated.timing(headerContentOpacity, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(exploreFarmersOpacity, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [stickyHeaderVisible]);
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    // Show sticky header when scrolled past the Explore Farmers section
+    // The layout y gives position relative to ScrollView content, so we compare directly
+    // Account for header height so the sticky header appears when section reaches top
+    const threshold = exploreFarmersY - hp(2);
+    if (exploreFarmersY > 0 && offsetY >= threshold) {
+      if (!stickyHeaderVisible) {
+        setStickyHeaderVisible(true);
+      }
+    } else {
+      if (stickyHeaderVisible) {
+        setStickyHeaderVisible(false);
+      }
+    }
+  };
+
+  const handleExploreFarmersLayout = (event: any) => {
+    const { y } = event.nativeEvent.layout;
+    // y is the position relative to the ScrollView's content
+    setExploreFarmersY(y);
+  };
 
   const renderProductItem = ({ item }: { item: any }) => (
     <TouchableOpacity style={styles.productCard}>
@@ -60,9 +159,16 @@ const Home = ({navigation}: {navigation: any}) => {
   return (
     <View style={styles.container}>
       {/* Compact Header */}
-       <View style={styles.headerBg}>
+       <Animated.View style={[styles.headerBg, { height: headerHeight }]}>
          <View style={styles.headerContentCompact}>
-           <View style={styles.headerRowCompact}>
+           {/* User info row - animated opacity */}
+           <Animated.View 
+             style={[
+               styles.headerRowCompact,
+               { opacity: headerContentOpacity }
+             ]}
+             pointerEvents={stickyHeaderVisible ? 'none' : 'auto'}
+           >
              <CacheImage
                url={'https://randomuser.me/api/portraits/men/1.jpg'}
                style={styles.avatar}
@@ -82,7 +188,10 @@ const Home = ({navigation}: {navigation: any}) => {
                  </View>
                </View>
              </TouchableOpacity>
-           </View>
+           </Animated.View>
+           
+    
+           
            {/* Search Bar inside header */}
            <Pressable
              onPress={() => navigation.navigate('SearchScreen')}
@@ -92,9 +201,33 @@ const Home = ({navigation}: {navigation: any}) => {
              <Text style={styles.searchBarCompact}>Search farms OR browse categories</Text>
            </Pressable>
          </View>
-       </View>
+       </Animated.View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      {/* Sticky Header for Explore Farmers */}
+      <Animated.View 
+        style={[
+          styles.stickyHeader,
+          {
+            opacity: exploreFarmersOpacity,
+            transform: [{
+              translateY: exploreFarmersOpacity.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-20, 0],
+              }),
+            }],
+          }
+        ]}
+        pointerEvents={stickyHeaderVisible ? 'auto' : 'none'}
+      >
+        <Text style={styles.stickyHeaderText}>Explore Farmers</Text>
+      </Animated.View>
+
+      <ScrollView 
+        style={styles.content} 
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
         {/* Categories Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>What are you looking for?</Text>
@@ -123,7 +256,11 @@ const Home = ({navigation}: {navigation: any}) => {
 
 
         {/* Explore Farmers */}
-        <View style={styles.section}>
+        <View 
+          ref={exploreFarmersRef}
+          style={styles.section}
+          onLayout={handleExploreFarmersLayout}
+        >
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Explore Farmers</Text>
             {/* <TouchableOpacity style={styles.sortBtn}>
@@ -193,6 +330,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: hp(2),
+    minHeight: hp(6),
   },
    headerTitleCompact: {
     color: '#FFD44A',
@@ -558,5 +696,28 @@ const styles = StyleSheet.create({
     fontSize: scale(11),
     fontFamily: typography.fontFamily.Regular,
     color: '#666',
+  },
+  stickyHeader: {
+    position: 'absolute',
+    top: hp('15'),
+    left: 0,
+    right: 0,
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: wp(4),
+    paddingVertical: hp(1.5),
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(217, 217, 217, 1)',
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  stickyHeaderText: {
+    fontSize: fontSizes.fs18,
+    fontFamily: typography.fontFamily.SemiBold,
+    color: '#333',
+    fontWeight: '700',
   },
 });

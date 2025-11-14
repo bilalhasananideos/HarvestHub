@@ -90,7 +90,7 @@ const demoFarmers: Farmer[] = [
 
 type SortOption = 'rating_desc' | 'distance_asc' | 'name_asc';
 
-const SearchScreen = () => {
+const SearchScreen = ({navigation}:any) => {
   const [query, setQuery] = useState('');
   const [sortOpen, setSortOpen] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>('rating_desc');
@@ -113,7 +113,7 @@ const SearchScreen = () => {
   }, [query, sortOption]);
 
   const renderCard = ({ item }: { item: Farmer }) => (
-    <View style={styles.card}>
+    <TouchableOpacity onPress={()=>navigation.navigate('ProductDetailScreen')} style={styles.card}>
       <CacheImage url={item.image} style={styles.cardImage} />
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle} numberOfLines={1}>
@@ -137,7 +137,7 @@ const SearchScreen = () => {
           </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

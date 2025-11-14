@@ -122,12 +122,12 @@ const CartScreen = () => {
 
           <View style={styles.itemHeaderRow}>
             <Text style={styles.sectionTitle}>Cart</Text>
-            <TouchableOpacity style={styles.addMoreRow}>
+            {/* <TouchableOpacity style={styles.addMoreRow}>
               <View style={styles.addMoreIcon}>
                 <Text style={styles.addMoreIconText}>+</Text>
               </View>
               <Text style={styles.addMoreText}>Add more items</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
           <View style={styles.itemCard}>

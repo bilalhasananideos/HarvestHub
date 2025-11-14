@@ -1,10 +1,10 @@
 {
   "mcpServers": {
     "RadonAi": {
-      "url": "http://127.0.0.1:50840/mcp",
+      "url": "http://127.0.0.1:49671/mcp",
       "type": "http",
       "headers": {
-        "nonce": "181ab06f-9d30-48bd-8525-21d7a6040e0e"
+        "nonce": "2455d2e2-3863-4ade-975d-b839db4867ec"
       }
     }
   }
