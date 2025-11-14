@@ -151,11 +151,11 @@ const ProductDetailScreen = ({ route }: any) => {
       <View style={styles.bottomBar}>
         <View style={styles.quantityPicker}>
           <TouchableOpacity style={styles.qtyBtn} onPress={() => handleQuantityChange(-1)}>
-            <CacheImage url={sub} style={styles.qtyIcon} />
+            <Image source={sub} style={styles.qtyIcon} />
           </TouchableOpacity>
           <Text style={styles.qtyText}>{quantity}kg</Text>
           <TouchableOpacity style={styles.qtyBtn} onPress={() => handleQuantityChange(1)}>
-            <CacheImage url={plus} style={styles.qtyIcon} />
+            <Image     source={plus} style={styles.qtyIcon} />
           </TouchableOpacity>
         </View>
 
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
 
   // Content
-  content: { paddingHorizontal: wp(5), paddingTop: hp(3) },
+  content: { paddingHorizontal: wp(5),  },
   title: {
     fontSize: scale(26),
     fontFamily: typography.fontFamily.SemiBold,
@@ -384,7 +384,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -392,7 +391,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
-  qtyIcon: { width: 16, height: 16, tintColor: colors.primary.main },
+  qtyIcon: { width: wp(8), height: wp(8),  },
   qtyText: {
     fontSize: scale(16),
     fontFamily: typography.fontFamily.SemiBold,

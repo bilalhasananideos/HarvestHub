@@ -11,6 +11,7 @@ import SearchScreen from '../screens/SearchScreen';
 import ProductDetailScreen from '../screens/ProductDetail';
 import AllOrdersScreen from '../screens/AllOrdersScreen';
 import MessageScreen from '../screens/MessageScreen';
+import VendorProfile from '../screens/VendorProfile';
 
 
 
@@ -57,9 +58,10 @@ export default function RootNavigator() {
         <Stack.Screen name="MybottomTabs" component={MybottomTabs} />
         <Stack.Screen name="Profile" component={Profile} options={headerOptions('Profile')} />
         <Stack.Screen  name="SearchScreen" component={SearchScreen} options={{ headerShown: false }} />
-        <Stack.Screen  name="ProductDetailScreen" component={ProductDetailScreen} options={headerOptions('Product Detail')} />
+        <Stack.Screen  name="ProductDetailScreen" component={ProductDetailScreen} options={headerOptions('Product details')} />
         <Stack.Screen  name="AllOrdersScreen" component={AllOrdersScreen} options={headerOptions('My Orders')} />
         <Stack.Screen  name="MessageScreen" component={MessageScreen} options={headerOptions('Message')} />
+        <Stack.Screen  name="VendorProfile" component={VendorProfile} options={headerOptions('Vendor Profile')} />
       </Stack.Navigator>
          )}
     </NavigationContainer>

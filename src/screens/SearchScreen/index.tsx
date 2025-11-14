@@ -113,7 +113,7 @@ const SearchScreen = ({navigation}:any) => {
   }, [query, sortOption]);
 
   const renderCard = ({ item }: { item: Farmer }) => (
-    <TouchableOpacity onPress={()=>navigation.navigate('ProductDetailScreen')} style={styles.card}>
+    <TouchableOpacity onPress={()=>navigation.navigate('VendorProfile')} style={styles.card}>
       <CacheImage url={item.image} style={styles.cardImage} />
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle} numberOfLines={1}>

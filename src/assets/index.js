@@ -21,6 +21,11 @@ export { default as camera } from './images/camera.png';
 export { default as myorder } from './images/myorder.png';
 export { default as notification } from './images/notification.png';
 
+//Vendor Profile
+export { default as note } from './images/note.png';
+export { default as calender } from './images/calendar.png';
+export { default as clock } from './images/clock.png';
+
 // SPLASH IMAGE
 export { default as logo } from './images/logo.png';
 export { default as onboarding1 } from './images/onboarding1.png';
