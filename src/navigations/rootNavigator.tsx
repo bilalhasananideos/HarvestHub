@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createNativeStackNavigator, NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import MybottomTabs from './bottomNavigation';
 import { NavigationContainer } from '@react-navigation/native';
@@ -12,6 +12,10 @@ import ProductDetailScreen from '../screens/ProductDetail';
 import AllOrdersScreen from '../screens/AllOrdersScreen';
 import MessageScreen from '../screens/MessageScreen';
 import VendorProfile from '../screens/VendorProfile';
+import { useDispatch, useSelector } from 'react-redux';
+import { getItem } from '../utils/localStorage';
+import { updateUserStates } from '../store/actions/UserActions';
+import WriteReviewScreen from '../screens/WriteReviewScreen';
 
 
 
@@ -34,10 +38,25 @@ const headerOptions = (title: string): NativeStackNavigationOptions => ({
   },
 });
 export default function RootNavigator() {
+  const dispatch = useDispatch();
+  const token = useSelector(state => state.userReducer.token);
+  const isLoggedIn = !!token; // true if token exists
+
+  const checkToken = async () => {
+    const response = await getItem('key');
+    console.log("data", response)
+    if( response ){
+      dispatch( updateUserStates(response) );
+    }
+  }
+
+  useEffect(() => {
+    checkToken()
+  }, [])
   
   return (
     <NavigationContainer>
-    {false ? (  <Stack.Navigator
+    {!isLoggedIn ? (  <Stack.Navigator
         screenOptions={{
           animation: 'slide_from_right',
           headerShown: false,
@@ -62,6 +81,7 @@ export default function RootNavigator() {
         <Stack.Screen  name="AllOrdersScreen" component={AllOrdersScreen} options={headerOptions('My Orders')} />
         <Stack.Screen  name="MessageScreen" component={MessageScreen} options={headerOptions('Message')} />
         <Stack.Screen  name="VendorProfile" component={VendorProfile} options={headerOptions('Vendor Profile')} />
+        <Stack.Screen  name="WriteReviewScreen" component={WriteReviewScreen} options={headerOptions('Write a Review')} />
       </Stack.Navigator>
          )}
     </NavigationContainer>

@@ -1,12 +1,87 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
 import React, { useEffect, useState } from 'react';
+import {Image, StyleSheet, Text, View, PermissionsAndroid, Platform} from 'react-native';
 import RootNavigator from './src/navigations/rootNavigator';
 import { logo } from './src/assets';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import messaging from '@react-native-firebase/messaging';
+import { Provider } from 'react-redux';
+import { store } from './src/store';
 
 const App = () => {
     const [splashVisible,setSplashVisible]=useState(true);
-      useEffect(() => {
+
+    async function requestUserPermission() {
+      if (Platform.OS === 'ios') {
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+          if (enabled) getFCMToken();
+          console.log('iOS Permission:', authStatus);
+      } else if (Platform.OS === 'android' && Platform.Version >= 33) {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+          );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            getFCMToken()
+            console.log('Notification permission granted for Android 13+');
+          } else {
+            console.log('Notification permission denied for Android 13+');
+          }
+        } catch (err) {
+          console.warn(err);
+        }
+      }
+    }
+
+    async function getFCMToken() {
+      // Register the device with FCM (especially important for iOS)
+      await messaging().registerDeviceForRemoteMessages();
+
+      const token = await messaging().getToken();
+      if (token) {
+        console.log('FCM Token:', token);
+      } else {
+        console.log('No FCM token received');
+      }
+    }
+
+    // import { getMessaging, requestPermission } from '@react-native-firebase/messaging';
+
+    // const messagingInstance = getMessaging();
+
+    // // request notification permission
+    // const authStatus = await requestPermission();
+
+    // // check status
+    // const enabled =
+    // authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    // authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+
+    
+    // import { getMessaging, requestPermission, AuthorizationStatus } from '@react-native-firebase/messaging';
+    //   const requestUserPermission = async () => {
+    //     try {
+    //       const messagingInstance = getMessaging();
+    //       const authStatus = await requestPermission(messagingInstance);
+    
+    //       if (
+    //         authStatus === AuthorizationStatus.AUTHORIZED ||
+    //         authStatus === AuthorizationStatus.PROVISIONAL
+    //       ) {
+    //         console.log("iOS Permission:", authStatus);
+    //       }
+    //     } catch (e) {
+    //       console.log("FCM Permission Error:", e);
+    //     }
+    //   };
+    // }
+    
+    useEffect(() => {
+    requestUserPermission()
     const timer = setTimeout(() => {
       setSplashVisible(false);
     }, 2000); // 2 seconds
@@ -23,7 +98,12 @@ const App = () => {
       style={styles.splash}></ImageBackground> */}
       </View>
   );
-  return splashVisible?Splash_Screen:<GestureHandlerRootView><RootNavigator /></GestureHandlerRootView>;
+  return splashVisible?Splash_Screen:
+  <GestureHandlerRootView>
+    <Provider store={store}> 
+      <RootNavigator />
+    </Provider>
+  </GestureHandlerRootView>;
 };
 
 export default App;

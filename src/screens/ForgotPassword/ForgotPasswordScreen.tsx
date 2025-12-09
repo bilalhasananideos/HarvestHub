@@ -18,7 +18,8 @@ import { scale, typography } from '../../theme/typography';
 import { colors } from '../../theme/colors';
 import { fontSizes, hp, wp } from '../../theme/responsive';
 import { Platform } from 'react-native';
-import { resetPassword } from '../../services/auth';
+// import { resetPassword } from '../../services/auth';
+import auth, { getAuth } from '@react-native-firebase/auth';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -48,23 +49,25 @@ export default function ForgotPasswordScreen({ navigation }: any) {
     setError('');
 
     try {
-      const result = await resetPassword(email.trim());
+      // const result = await resetPassword(email.trim());
       
-      if (result.success) {
-        setEmailSent(true);
-        Alert.alert(
-          'Reset Email Sent',
-          'Please check your email for password reset instructions.',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.goBack(),
-            },
-          ]
-        );
-      } else {
-        setError(result.error || 'Failed to send reset email');
-      }
+      // if (result.success) {
+      //   setEmailSent(true);
+      //   Alert.alert(
+      //     'Reset Email Sent',
+      //     'Please check your email for password reset instructions.',
+      //     [
+      //       {
+      //         text: 'OK',
+      //         onPress: () => navigation.goBack(),
+      //       },
+      //     ]
+      //   );
+      // } else {
+      //   setError(result.error || 'Failed to send reset email');
+      // }
+      const data = await auth().sendPasswordResetEmail(email);
+      console.log("data", data)
     } catch (error: any) {
       console.log('Password reset error:', error);
       setError('An unexpected error occurred. Please try again.');
@@ -219,7 +222,8 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     width: '100%',
-    backgroundColor: colors.secondary.main,
+    // backgroundColor: colors.secondary.main,
+    backgroundColor: colors.background.dark,
     borderRadius: wp(8),
     paddingVertical: hp(2),
     alignItems: 'center',
@@ -251,7 +255,7 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.Medium,
   },
   backButton: {
-    backgroundColor: colors.secondary.main,
+    // backgroundColor: colors.secondary.main,
     borderRadius: wp(8),
     paddingVertical: hp(1.5),
     paddingHorizontal: wp(6),
@@ -268,7 +272,7 @@ const styles = StyleSheet.create({
     marginTop: hp(2),
   },
   loginLinkText: {
-    color: colors.secondary.main,
+    // color: colors.secondary.main,
     fontSize: scale(16),
     fontFamily: typography.fontFamily.Medium,
     textDecorationLine: 'underline',

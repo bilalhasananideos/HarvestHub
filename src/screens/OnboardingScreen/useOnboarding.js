@@ -4,7 +4,8 @@ import { Dimensions } from 'react-native';
 import { isIOS } from '../../theme/responsive';
 import { logo } from '../../assets';
 import { onboardingData } from '../../constants/data';
-import { setOnboardingComplete } from '../../redux/slices/authSlice';
+import { setOnboardingComplete } from '../../store/slices/authSlice';
+import { setItem } from '../../utils/localStorage';
 const useOnboardingScreen = navigation => {
   const flatListRef = useRef(null);
   // const hasSeenOnboarding = useSelector(state => state.auth.hasSeenOnboarding);
@@ -36,8 +37,9 @@ const useOnboardingScreen = navigation => {
     }
   };
 
-  const handleLogin = () => {
-    navigation.navigate('SignIn');
+  const handleLogin = async () => {
+    navigation.replace('SignIn');
+    await setItem("isFirstLaunch", false);
   };
 
   // // Check if user has seen onboarding before
