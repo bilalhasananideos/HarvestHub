@@ -2,8 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
+	<!-- <key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/> -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -19,11 +19,24 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
+	<string>1.0.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.943734294750-niro5qq2fahijsqeljd7n48fh39ho64v</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>1.0.0</string>
+	<key>CLIENT_ID</key>
+	<string>943734294750-niro5qq2fahijsqeljd7n48fh39ho64v.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -33,10 +46,41 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera to allow you to record video.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Our app requires your location to provide navigation directions and location-based content even when the app is running in the background.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string/>
+	<string>Our app needs access to your location to improve the search results and suggest nearby job opportunities.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to your microphone to record audio while capturing video.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need permission to save videos to your gallery.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Our app needs access to your photo library to let you upload profile pictures directly from your device.</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.943734294750-niro5qq2fahijsqeljd7n48fh39ho64v</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>WorkSans-Bold.ttf</string>
+		<string>WorkSans-ExtraBold.ttf</string>
+		<string>WorkSans-Light.ttf</string>
+		<string>WorkSans-Medium.ttf</string>
+		<string>WorkSans-Regular.ttf</string>
+		<string>WorkSans-SemiBold.ttf</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+		<string>remote-notification</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.harvesthub</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -51,14 +95,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>UIAppFonts</key>
-	<array>
-		<string>WorkSans-Bold.ttf</string>
-		<string>WorkSans-ExtraBold.ttf</string>
-		<string>WorkSans-Light.ttf</string>
-		<string>WorkSans-Medium.ttf</string>
-		<string>WorkSans-Regular.ttf</string>
-		<string>WorkSans-SemiBold.ttf</string>
-	</array>
 </dict>
 </plist>
