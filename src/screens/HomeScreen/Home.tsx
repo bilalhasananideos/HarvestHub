@@ -1,10 +1,15 @@
-import { StyleSheet, Text, TouchableOpacity, View, Image, Pressable, ScrollView, FlatList, NativeScrollEvent, NativeSyntheticEvent, Animated } from 'react-native';
-import React, { useRef, useState, useEffect } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, Image, Pressable, ScrollView, FlatList, NativeScrollEvent, NativeSyntheticEvent, Animated, ActivityIndicator } from 'react-native';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { fontSizes, hp, scale, wp } from '../../theme/responsive';
 import CacheImage from '../../components/CacheImage';
 import { cart, scope, star, location, truck } from '../../assets';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
+import { useDispatch, useSelector } from 'react-redux';
+import { getHomeApi } from '../../store/services/Services';
+import { capitalize } from '../../utils/utils';
+import moment from 'moment'
+import { useFocusEffect } from '@react-navigation/native';
 
 // Demo data
 const demoData = {
@@ -73,14 +78,51 @@ const demoData = {
 };
 
 const Home = ({navigation}: {navigation: any}) => {
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.userReducer.user);
+
   const exploreFarmersRef = useRef<View>(null);
   const [exploreFarmersY, setExploreFarmersY] = useState(0);
   const [stickyHeaderVisible, setStickyHeaderVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [farmers, setFarmers] = useState([]);
   
   // Animated values for smooth transitions
   const headerHeight = useRef(new Animated.Value(hp('22'))).current;
   const headerContentOpacity = useRef(new Animated.Value(1)).current;
   const exploreFarmersOpacity = useRef(new Animated.Value(0)).current;
+
+  const getHomeData = async () => {
+    try {
+      setLoading(true);
+      const resp = await getHomeApi();
+      console.log("resp", resp);
+      if (resp) {
+        setCategories(resp.categories || []);
+        setTopProducts(resp.top_products || []);
+        setFarmers(resp.nearby_farmers || []);
+      }
+    } catch (err) {
+      console.log("err", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+    
+  // useEffect(() => {
+  //   getHomeData();
+  // }, [])
+  useFocusEffect(
+    useCallback(() => {
+      getHomeData();
+  
+      return () => {
+        // optional cleanup when leaving screen
+      };
+    }, [])
+  );
 
   useEffect(() => {
     if (stickyHeaderVisible) {
@@ -154,10 +196,28 @@ const Home = ({navigation}: {navigation: any}) => {
     </TouchableOpacity>
   );
 
- 
+  // if (loading) {
+  //   return (
+  //     <View style={{
+  //       flex: 1,
+  //       justifyContent: 'center',
+  //       alignItems: 'center',
+  //       backgroundColor: '#fff'
+  //     }}>
+  //       <ActivityIndicator size="large" color="#4CAF50" />
+  //       <Text style={{ marginTop: 10 }}>Loading...</Text>
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
+      {/* Overlay Loader */}
+      {loading && (
+        <View style={styles.loaderOverlay}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+        </View>
+      )}
       {/* Compact Header */}
        <Animated.View style={[styles.headerBg, { height: headerHeight }]}>
          <View style={styles.headerContentCompact}>
@@ -174,8 +234,8 @@ const Home = ({navigation}: {navigation: any}) => {
                style={styles.avatar}
              />
              <View style={{ flex: 1, marginLeft: 10 }}>
-               <Text style={styles.headerTitleCompact}>Hello, Samuel</Text>
-               <Text style={styles.headerDateCompact}>Mon 16 Sept</Text>
+               <Text numberOfLines={1} style={styles.headerTitleCompact}>Hello, {capitalize(user.name)}</Text>
+               <Text style={styles.headerDateCompact}>{moment().format("ddd DD MMM")}</Text>
              </View>
              <TouchableOpacity
                style={styles.cartBtn}
@@ -232,7 +292,8 @@ const Home = ({navigation}: {navigation: any}) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>What are you looking for?</Text>
           <View style={styles.categoriesGrid}>
-            {demoData.categories.map((item) => (
+            {/* {demoData.categories.map((item) => ( */}
+            {categories.map((item) => (
               <TouchableOpacity key={item.id} style={styles.categoryCard}>
                 <CacheImage url={item.image} style={styles.categoryImage} />
                 <Text style={styles.categoryName}>{item.name}</Text>
@@ -245,7 +306,8 @@ const Home = ({navigation}: {navigation: any}) => {
         <View style={[styles.section,{borderTopWidth:1,borderBottomWidth:1,borderColor:'rgba(217, 217, 217, 1)',paddingVertical:15},]}>
           <Text style={styles.sectionTitle}>Popular products</Text>
           <FlatList
-            data={demoData.popularProducts}
+            // data={demoData.popularProducts}
+            data={topProducts}
             renderItem={renderProductItem}
             keyExtractor={(item) => item.id}
             horizontal
@@ -269,8 +331,13 @@ const Home = ({navigation}: {navigation: any}) => {
             </TouchableOpacity> */}
           </View>
           <View style={styles.farmersGrid}>
-            {demoData.farmers.map((item) => (
-              <TouchableOpacity key={item.id} style={styles.farmerCard}>
+            {/* {demoData.farmers.map((item) => ( */}
+            {farmers.map((item) => (
+              <TouchableOpacity key={item.id} style={styles.farmerCard} 
+                onPress={()=>navigation.navigate('VendorProfile', {
+                  vendorProfileId: item.id
+                })}
+              >
                 <CacheImage url={item.image} style={styles.farmerImage} />
                 <View style={styles.farmerInfo}>
                   <Text style={styles.farmerName}>{item.name}</Text>
@@ -284,7 +351,7 @@ const Home = ({navigation}: {navigation: any}) => {
                   </View>
                   <View style={styles.farmerVisit}>
                     <View style={styles.checkIcon} />
-                    <Text style={styles.visitText}>Farm visit available</Text>
+                    <Text style={styles.visitText}>{item.farm_visit ? 'Farm visit available' : 'Visit on request'}</Text>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -302,6 +369,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
+  },
+  loaderOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // semi-transparent
+    zIndex: 999,
   },
   divider: {
     flex: 1,

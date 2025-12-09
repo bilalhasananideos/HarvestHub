@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -35,9 +36,11 @@ import {
   clock,
   note,
 } from '../../assets';
+import { getVendorProfileApi, visitFarmApi } from '../../store/services/Services';
 
 const VendorProfile = ({ route }: any) => {
   const navigation = useNavigation<any>();
+  const { vendorProfileId } = route.params;
   const [activeTab, setActiveTab] = useState('Products');
   const [isTabsSticky, setIsTabsSticky] = useState(false);
   const vendorSectionRef = useRef<View>(null);
@@ -171,6 +174,128 @@ const VendorProfile = ({ route }: any) => {
   ];
 
   const tabs = ['Products', 'Reviews', 'Farm visit'];
+  const [loading, setLoading] = useState(false);
+  
+  // const [vendorInfo, setVendorInfo] = useState(null);
+  const [vendorInfo, setVendorInfo] = useState({
+    id: "",
+    name: "",
+    image: "",
+    farm_visit: 0,
+    address: "",
+  });
+  // const [ratingInfo, setRatingInfo] = useState(null);
+  const [ratingInfo, setRatingInfo] = useState({ average: 0, total: 0 });
+  const [products1, setProducts] = useState([]);
+  const [reviews1, setReviews] = useState([]);
+  const [ratingBreakdown1, setRatingBreakdown] = useState({ 1:0, 2:0, 3:0, 4:0, 5:0 });
+
+  useEffect(() => {
+    getVendorProfile();
+  }, [activeTab])
+  
+  const getVendorProfile = async () => {
+    try {
+      setLoading(true);
+
+      let params: any = {};
+
+      if (activeTab === "Products") params = { products: true };
+      if (activeTab === "Reviews") params = { reviews: true };  
+      
+      const resp = await getVendorProfileApi(vendorProfileId, params);
+      console.log("Api resp", resp);
+            
+      /** MAP API RESPONSE TO STATES */
+      // // setVendorInfo(resp.vendor || null);
+      // // setRatingInfo(resp.rating || null);
+
+      // setVendorInfo({
+      //   id: resp.vendor?.id || "",
+      //   name: resp.vendor?.name || "",
+      //   image: resp.vendor?.image || "",
+      //   farm_visit: resp.vendor?.farm_visit || 0,
+      //   address: resp.vendor?.address || "",
+      // });
+      
+      // setRatingInfo({
+      //   average: resp.rating?.average || 0,
+      //   total: resp.rating?.total || 0,
+      // });      
+
+      // if (resp.products && activeTab === "Products") {
+      //   setProducts(resp.products);
+      // }
+
+      // if (resp.reviews && activeTab === "Reviews") {
+      //   setReviews(resp.reviews);
+      // }
+
+      const data = mapVendorProfile(resp);
+
+      setVendorInfo(data.vendorInfo);
+      setRatingInfo(data.ratingInfo);
+
+      if (activeTab === "Products") setProducts(data.products);
+      if (activeTab === "Reviews") {
+        setRatingBreakdown(resp.breakdown || { 1:0, 2:0, 3:0, 4:0, 5:0 });
+        setReviews(resp.reviews || []);
+      }
+      
+
+    } catch (err) {
+      console.log("err", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const mapVendorProfile = (resp) => ({
+    vendorInfo: {
+      id: resp.vendor?.id || "",
+      name: resp.vendor?.name || "",
+      image: resp.vendor?.image || "",
+      farm_visit: resp.vendor?.farm_visit || 0,
+      address: resp.vendor?.address || "",
+    },
+    ratingInfo: {
+      average: resp.rating?.average || 0,
+      total: resp.rating?.total || 0,
+    },
+    products: resp.products || [],
+    reviews: resp.reviews || [],
+  });
+
+  const onSubmitFarmVisit = async () => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        vendor_id: vendorInfo.id,
+        name: farmVisitForm.name,
+        visit_date: farmVisitForm.date,
+        visit_time: farmVisitForm.time,
+        note: farmVisitForm.note,
+      };
+      console.log("payload", payload)  
+
+      const resp = await visitFarmApi(payload);
+      console.log("Review Response:", resp);
+
+      // Optional: clear form
+      setFarmVisitForm({
+        name: '',
+        date: '',
+        time: '',
+        note: '',
+      });
+
+    } catch (err) {
+      console.log("Review Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
@@ -194,28 +319,55 @@ const VendorProfile = ({ route }: any) => {
     setVendorSectionY(y + height + hp(6));
   };
 
-  const renderProduct = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      onPress={() => navigation.navigate('ProductDetailScreen')}
+  // const renderProduct = ({ item }: { item: any }) => (
+  //   <TouchableOpacity
+  //     onPress={() => navigation.navigate('ProductDetailScreen')}
+  //     style={styles.productCard}
+  //   >
+  //     <View style={styles.productImageContainer}>
+  //       <CacheImage url={item.image} style={styles.productImage} />
+  //       <TouchableOpacity style={styles.addButton}>
+  //         <Image source={plus} style={styles.addButtonIcon} />
+  //       </TouchableOpacity>
+  //     </View>
+  //     <Text style={styles.productName}>{item.name}</Text>
+  //     <Text style={styles.productSubtitle}>{item.subtitle}</Text>
+  //     <View style={styles.productFooter}>
+  //       <Text style={styles.productWeight}>{item.weight}</Text>
+  //       <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+  //     </View>
+  //   </TouchableOpacity>
+  // );
+  const renderProduct = ({ item }) => (
+    <TouchableOpacity 
+      onPress={() => navigation.navigate('ProductDetailScreen', {
+        item
+      })}
       style={styles.productCard}
     >
       <View style={styles.productImageContainer}>
-        <CacheImage url={item.image} style={styles.productImage} />
+        <CacheImage url={item.images?.[0]?.image} style={styles.productImage} />
         <TouchableOpacity style={styles.addButton}>
           <Image source={plus} style={styles.addButtonIcon} />
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.productName}>{item.name}</Text>
-      <Text style={styles.productSubtitle}>{item.subtitle}</Text>
+         </TouchableOpacity>
+      </View>  
+      <Text style={styles.productName}>{item.product?.name}</Text>
+      <Text style={styles.productSubtitle}>{item.description}</Text>
       <View style={styles.productFooter}>
-        <Text style={styles.productWeight}>{item.weight}</Text>
-        <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+        <Text style={styles.productWeight}>{item.count} {item.unit?.name}</Text>
+        <Text style={styles.productPrice}>Rs {item.price}</Text>
       </View>
     </TouchableOpacity>
-  );
+  );  
 
   return (
     <View style={styles.container}>
+      {/* Overlay Loader */}
+      {loading && (
+        <View style={styles.loaderOverlay}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+        </View>
+      )}
       {/* Sticky Tabs */}
       {isTabsSticky && (
         <View style={[styles.stickyTabsContainer]}>
@@ -245,7 +397,7 @@ const VendorProfile = ({ route }: any) => {
         scrollEventThrottle={16}
       >
         {/* Vendor Profile Section */}
-        <View
+        {/* <View
           ref={vendorSectionRef}
           style={styles.vendorSection}
           onLayout={handleVendorSectionLayout}
@@ -279,6 +431,48 @@ const VendorProfile = ({ route }: any) => {
             <View style={styles.locationRow}>
               <Image source={location} style={styles.locationIcon} />
               <Text style={styles.addressText}>{vendor.address}</Text>
+            </View>
+            <TouchableOpacity>
+              <Text style={styles.viewMapText}>View on map</Text>
+            </TouchableOpacity>
+          </View>
+        </View> */}
+        <View 
+          ref={vendorSectionRef}
+          style={styles.vendorSection}
+          onLayout={handleVendorSectionLayout}
+        >
+          <CacheImage url={vendorInfo.image} style={styles.vendorImage} />
+          <View style={styles.vendorInfo}>
+            <Text style={styles.vendorName}>{vendorInfo.name}</Text>
+
+            <View style={styles.ratingRow}>
+              <Image source={star} style={styles.starIcon} />
+              <Text style={styles.ratingText}>
+                {ratingInfo?.average} ({ratingInfo?.total}) reviews
+              </Text>
+            </View>
+
+            <View style={styles.visitRow}>
+              {vendorInfo.farm_visit == 1 ? (
+                <>
+                  <View style={styles.checkIcon}>
+                    <Text style={styles.checkmarkText}>✓</Text>
+                  </View>
+                  <Text style={styles.visitText}>Farm visit available</Text>
+                </>
+              ) : (
+                <>
+                  <View style={styles.unavailableIcon}>
+                    <Text style={styles.unavailableText}>—</Text>
+                  </View>
+                  <Text style={styles.visitText}>Farm visit not available</Text>
+                </>
+              )}
+            </View>
+            <View style={styles.locationRow}>
+              <Image source={location} style={styles.locationIcon} />
+              <Text style={styles.addressText}>{vendorInfo.address}</Text>
             </View>
             <TouchableOpacity>
               <Text style={styles.viewMapText}>View on map</Text>
@@ -328,7 +522,8 @@ const VendorProfile = ({ route }: any) => {
           <View style={styles.productsSection}>
             <Text style={styles.sectionTitle}>Just for you</Text>
             <FlatList
-              data={products}
+              // data={products}
+              data={products1}
               renderItem={renderProduct}
               keyExtractor={item => item.id}
               numColumns={2}
@@ -352,9 +547,17 @@ const VendorProfile = ({ route }: any) => {
                         style={[
                           styles.ratingBar,
                           {
+                            // // width: `${
+                            // //   (ratingBreakdown[
+                            // //     star as keyof typeof ratingBreakdown
+                            // //   ] /
+                            // //     52) *
+                            // //   100
+                            // // }%`,
+                            // width: `${(ratingBreakdown[star] / (ratingInfo.total || 1)) * 100}%`,
                             width: `${
-                              (ratingBreakdown[
-                                star as keyof typeof ratingBreakdown
+                              (ratingBreakdown1[
+                                star as keyof typeof ratingBreakdown1
                               ] /
                                 52) *
                               100
@@ -367,7 +570,8 @@ const VendorProfile = ({ route }: any) => {
                 ))}
               </View>
               <View style={styles.ratingSummaryRight}>
-                <Text style={styles.ratingSummaryNumber}>{vendor.rating}</Text>
+                {/* <Text style={styles.ratingSummaryNumber}>{vendor.rating}</Text> */}
+                <Text style={styles.ratingSummaryNumber}>{ratingInfo.average.toFixed(1)}</Text>
                 <View style={styles.ratingSummaryStars}>
                   {[1, 2, 3, 4, 5].map(starNum => (
                     <Image
@@ -375,15 +579,17 @@ const VendorProfile = ({ route }: any) => {
                       source={star}
                       style={[
                         styles.ratingSummaryStarIcon,
-                        starNum <= Math.floor(vendor.rating) && {
-                          tintColor: '#FFD700',
-                        },
+                        // starNum <= Math.floor(vendor.rating) && {
+                        //   tintColor: '#FFD700',
+                        // },
+                        starNum <= Math.floor(ratingInfo.average) && { tintColor: '#FFD700' },
                       ]}
                     />
                   ))}
                 </View>
                 <Text style={styles.ratingSummaryCount}>
-                  {vendor.reviews} Reviews
+                  {/* {vendor.reviews} Reviews */}
+                  {ratingInfo.total} Reviews
                 </Text>
               </View>
             </View>
@@ -391,40 +597,50 @@ const VendorProfile = ({ route }: any) => {
             {/* Individual Reviews */}
             <View style={styles.reviewsList}>
               {reviews.map(review => (
-                <View key={review.id} style={styles.reviewItem}>
-                  <CacheImage url={review.avatar} style={styles.reviewAvatar} />
-                  <View style={styles.reviewContent}>
-                    <View style={styles.reviewHeader}>
-                      <View style={styles.reviewHeaderLeft}>
-                        <Text style={styles.reviewName}>{review.name}</Text>
-                        <View style={styles.reviewStars}>
-                          {[1, 2, 3, 4, 5].map(starNum => (
-                            <Image
-                              key={starNum}
-                              source={star}
-                              style={[
-                                styles.reviewStarIcon,
-                                starNum <= review.rating && {
-                                  tintColor: '#FFD700',
-                                },
-                              ]}
-                            />
-                          ))}
+              // {reviews1.length === 0 ? (
+              //   <Text>No reviews yet</Text>
+              // ) : (
+              //   reviews1.map(review => (
+                  <View key={review.id} style={styles.reviewItem}>
+                    <CacheImage url={review.avatar} style={styles.reviewAvatar} />
+                    <View style={styles.reviewContent}>
+                      <View style={styles.reviewHeader}>
+                        <View style={styles.reviewHeaderLeft}>
+                          <Text style={styles.reviewName}>{review.name}</Text>
+                          <View style={styles.reviewStars}>
+                            {[1, 2, 3, 4, 5].map(starNum => (
+                              <Image
+                                key={starNum}
+                                source={star}
+                                style={[
+                                  styles.reviewStarIcon,
+                                  starNum <= review.rating && {
+                                    tintColor: '#FFD700',
+                                  },
+                                ]}
+                              />
+                            ))}
+                          </View>
+                          <Text style={styles.reviewTime}>{review.time}</Text>
                         </View>
-                        <Text style={styles.reviewTime}>{review.time}</Text>
+                        <TouchableOpacity>
+                          <Text style={styles.reviewMenu}>⋯</Text>
+                        </TouchableOpacity>
                       </View>
-                      <TouchableOpacity>
-                        <Text style={styles.reviewMenu}>⋯</Text>
-                      </TouchableOpacity>
+                      <Text style={styles.reviewText}>{review.text}</Text>
                     </View>
-                    <Text style={styles.reviewText}>{review.text}</Text>
                   </View>
-                </View>
+              //   ))
+              // )}
               ))}
             </View>
 
             {/* Write Review Button */}
-            <TouchableOpacity style={styles.writeReviewButton}>
+            <TouchableOpacity style={styles.writeReviewButton}
+              onPress={() => navigation.navigate('WriteReviewScreen', {
+                vendorId: vendorInfo.id
+              })}
+            >
               <Text style={styles.writeReviewButtonText}>Write a review</Text>
             </TouchableOpacity>
           </View>
@@ -432,7 +648,8 @@ const VendorProfile = ({ route }: any) => {
 
         {activeTab === 'Farm visit' && (
           <View style={styles.farmVisitSection}>
-            {vendor.farmVisitAvailable ? (
+            {/* {vendor.farmVisitAvailable ? ( */}
+            {vendorInfo.farm_visit ? (
               <>
                 <Text style={styles.farmVisitTitle}>Plan Your Farm Visit</Text>
                 <Text style={styles.farmVisitDescription}>
@@ -498,7 +715,9 @@ const VendorProfile = ({ route }: any) => {
                   </View>
                 </View>
 
-                <TouchableOpacity style={styles.sendRequestButton}>
+                <TouchableOpacity style={styles.sendRequestButton}
+                  onPress={onSubmitFarmVisit}
+                >
                   <Text style={styles.sendRequestButtonText}>
                     Send farm visit request
                   </Text>
@@ -532,6 +751,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.default,
+  },
+  loaderOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // semi-transparent
+    zIndex: 999,
   },
   header: {
     flexDirection: 'row',
@@ -1079,3 +1309,80 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+// {activeTab === 'Reviews' && (
+//   <View style={styles.reviewsSection}>
+//     {/* Rating Summary */}
+//     <View style={styles.ratingSummary}>
+//       <View style={styles.ratingBreakdown}>
+//         {[5,4,3,2,1].map(star => (
+//           <View key={star} style={styles.ratingBarRow}>
+//             <Text style={styles.ratingBarLabel}>{star}</Text>
+//             <View style={styles.ratingBarContainer}>
+//               <View
+//                 style={[
+//                   styles.ratingBar,
+//                   {
+//                     width: `${(ratingBreakdown[star] / (ratingInfo.total || 1)) * 100}%`,
+//                   },
+//                 ]}
+//               />
+//             </View>
+//           </View>
+//         ))}
+//       </View>
+//       <View style={styles.ratingSummaryRight}>
+//         <Text style={styles.ratingSummaryNumber}>{ratingInfo.average.toFixed(1)}</Text>
+//         <View style={styles.ratingSummaryStars}>
+//           {[1,2,3,4,5].map(starNum => (
+//             <Image
+//               key={starNum}
+//               source={star}
+//               style={[
+//                 styles.ratingSummaryStarIcon,
+//                 starNum <= Math.floor(ratingInfo.average) && { tintColor: '#FFD700' },
+//               ]}
+//             />
+//           ))}
+//         </View>
+//         <Text style={styles.ratingSummaryCount}>{ratingInfo.total} Reviews</Text>
+//       </View>
+//     </View>
+
+//     {/* Individual Reviews */}
+//     <View style={styles.reviewsList}>
+//       {reviews1.length === 0 ? (
+//         <Text>No reviews yet</Text>
+//       ) : (
+//         reviews1.map(review => (
+//           <View key={review.id} style={styles.reviewItem}>
+//             <CacheImage url={review.avatar} style={styles.reviewAvatar} />
+//             <View style={styles.reviewContent}>
+//               <View style={styles.reviewHeader}>
+//                 <View style={styles.reviewHeaderLeft}>
+//                   <Text style={styles.reviewName}>{review.name}</Text>
+//                   <View style={styles.reviewStars}>
+//                     {[1,2,3,4,5].map(starNum => (
+//                       <Image
+//                         key={starNum}
+//                         source={star}
+//                         style={[
+//                           styles.reviewStarIcon,
+//                           starNum <= review.rating && { tintColor: '#FFD700' },
+//                         ]}
+//                       />
+//                     ))}
+//                   </View>
+//                   <Text style={styles.reviewTime}>{review.time}</Text>
+//                 </View>
+//                 <TouchableOpacity>
+//                   <Text style={styles.reviewMenu}>⋯</Text>
+//                 </TouchableOpacity>
+//               </View>
+//               <Text style={styles.reviewText}>{review.text}</Text>
+//             </View>
+//           </View>
+//         ))
+//       )}
+//     </View>
+//   </View>
+// )}

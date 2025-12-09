@@ -16,9 +16,13 @@ import { fontSizes, hp } from '../../theme/responsive';
 import { colors } from '../../theme/colors';
 
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { capitalize } from '../../utils/utils';
 
 const Profile = () => {
   const navigation = useNavigation<any>();
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.userReducer.user);
 
   const [editing, setEditing] = useState(false);
   const [nameDraft, setNameDraft] = useState(''); 
@@ -76,7 +80,7 @@ const Profile = () => {
         <View style={styles.inputRow}>
           <TextInput
             style={styles.input}
-            value={editing ? nameDraft : 'John Doe'}
+            value={editing ? nameDraft : `${capitalize(user.name)}`}
             onChangeText={setNameDraft}
   
           />
@@ -97,7 +101,7 @@ const Profile = () => {
           <TextInput
             style={styles.input}
             // value={emailFromAuth || ''}
-            value={ ''}
+            value={`${user.email}`}
             editable={false}
           />
         </View>

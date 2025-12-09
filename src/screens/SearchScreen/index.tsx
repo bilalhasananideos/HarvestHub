@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { hp, wp } from '../../theme/responsive';
 import { colors } from '../../theme/colors';
@@ -14,6 +15,9 @@ import { scale } from '../../theme/responsive';
 import { typography } from '../../theme/typography';
 import CacheImage from '../../components/CacheImage';
 import { filter, star, location, homeFill } from '../../assets';
+import { useDispatch, useSelector } from 'react-redux';
+import { getVendorListApi } from '../../store/services/Services';
+import { useFocusEffect } from '@react-navigation/native';
 
 type Farmer = {
   id: string;
@@ -91,29 +95,99 @@ const demoFarmers: Farmer[] = [
 type SortOption = 'rating_desc' | 'distance_asc' | 'name_asc';
 
 const SearchScreen = ({navigation}:any) => {
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.userReducer.user);
+
   const [query, setQuery] = useState('');
   const [sortOpen, setSortOpen] = useState(false);
+  const [farmers, setFarmers] = useState<Farmer[]>([]);
+  const [loading, setLoading] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>('rating_desc');
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const base = q
-      ? demoFarmers.filter((f) => f.name.toLowerCase().includes(q))
-      : demoFarmers.slice();
-
-    switch (sortOption) {
-      case 'distance_asc':
-        return base.sort((a, b) => a.distanceMiles - b.distanceMiles);
-      case 'name_asc':
-        return base.sort((a, b) => a.name.localeCompare(b.name));
-      case 'rating_desc':
-      default:
-        return base.sort((a, b) => b.rating - a.rating);
+  // useEffect(() => {
+  //   getExploreData();
+  // }, [])
+  useFocusEffect(
+    useCallback(() => {
+      getExploreData();
+  
+      return () => {
+        // optional cleanup when leaving screen
+      };
+    }, [])
+  );
+  
+  const getExploreData = async () => {
+    try {
+      setLoading(true);
+      
+      const resp = await getVendorListApi();
+      console.log("Api resp", resp);
+      
+      // API data ko Farmer model ke andar map karna
+      const apiFarmers: Farmer[] = resp?.map((item: any) => ({
+        // id: item.id.toString(),
+        id: item.id,
+        name: item.name,
+        rating: item.average_rating ? Number(item.average_rating) : 0,
+        reviews: item.total_reviews ?? 0,
+        distanceMiles: item.distance ? Number(item.distance) : 0,
+        visitAvailable: item.farm_visit === 1,
+        image: item.image,
+      }));
+      
+      setFarmers(apiFarmers);
+    } catch (err) {
+      console.log("err", err);
+    } finally {
+      setLoading(false);
     }
-  }, [query, sortOption]);
+  };
+
+    // const filtered = useMemo(() => {
+    //   const q = query.trim().toLowerCase();
+    //   const base = q
+    //     ? demoFarmers.filter((f) => f.name.toLowerCase().includes(q))
+    //     : demoFarmers.slice();
+  
+    //   switch (sortOption) {
+    //     case 'distance_asc':
+    //       return base.sort((a, b) => a.distanceMiles - b.distanceMiles);
+    //     case 'name_asc':
+    //       return base.sort((a, b) => a.name.localeCompare(b.name));
+    //     case 'rating_desc':
+    //     default:
+    //       return base.sort((a, b) => b.rating - a.rating);
+    //   }
+    // }, [query, sortOption]);
+  
+    const filtered = useMemo(() => {
+      const q = query.trim().toLowerCase();
+  
+      // Search
+      const base = q
+        ? farmers.filter((f) => f.name.toLowerCase().includes(q))
+        : farmers.slice();
+  
+      // Sorting
+      switch (sortOption) {
+        case 'distance_asc':
+          return base.sort((a, b) => a.distanceMiles - b.distanceMiles);
+  
+        case 'name_asc':
+          return base.sort((a, b) => a.name.localeCompare(b.name));
+  
+        case 'rating_desc':
+        default:
+          return base.sort((a, b) => b.rating - a.rating);
+      }
+    }, [query, sortOption, farmers]);
+
 
   const renderCard = ({ item }: { item: Farmer }) => (
-    <TouchableOpacity onPress={()=>navigation.navigate('VendorProfile')} style={styles.card}>
+    <TouchableOpacity onPress={()=>navigation.navigate('VendorProfile', {
+      vendorProfileId: item.id
+    })} style={styles.card}>
       <CacheImage url={item.image} style={styles.cardImage} />
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle} numberOfLines={1}>
@@ -142,6 +216,14 @@ const SearchScreen = ({navigation}:any) => {
 
   return (
     <View style={styles.container}>
+
+      {/* Loader */}
+      {loading && (
+        <View style={styles.loaderOverlay}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+        </View>
+      )}
+
       {/* Header with search bar */}
       <View style={styles.headerBg}>
         <View style={styles.headerInner}>
@@ -234,6 +316,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.default,
+  },
+  loaderOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // semi-transparent
+    zIndex: 999,
   },
   headerBg: {
     width: wp('100'),

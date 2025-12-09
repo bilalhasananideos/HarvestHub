@@ -27,9 +27,16 @@ import {
 import { fontSizes, hp, wp } from '../../theme/responsive';
 import { colors } from '../../theme/colors';
 import CacheImage from '../../components/CacheImage';
+import { useDispatch, useSelector } from 'react-redux';
+import { capitalize } from '../../utils/utils';
+import { removeItem } from '../../utils/localStorage';
+import { resetUserState } from '../../store/actions/UserActions';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 const SettingScreen = ({ navigation }: any) => {
   const bottomTabNavigation = useNavigation<any>();
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.userReducer.user);
 
   // Web link handlers
   const openWebLink = async (url: string) => {
@@ -107,6 +114,23 @@ const SettingScreen = ({ navigation }: any) => {
       ]
     );
   };
+
+  const logOutWithGoogle = async () => {
+    await GoogleSignin.revokeAccess();
+    await GoogleSignin.signOut();
+    console.log('logOutWithGoogle');
+  };
+
+  const logout = async () => {
+    // // if ( global.login === 'google' ) {
+    // await logOutWithGoogle()
+    // // }
+    await removeItem('key')
+    dispatch(resetUserState());
+    removeItem('key');
+    await logOutWithGoogle();
+    // navigation.replace("Login");
+  }
   return (
     <ScrollView
       style={styles.container}
@@ -117,8 +141,8 @@ const SettingScreen = ({ navigation }: any) => {
       <View style={styles.profileContainer}>
         <CacheImage url={'https://randomuser.me/api/portraits/men/1.jpg'} style={styles.profileImage} />
         <View style={{marginLeft:scale(1),flex:1}}>
-          <Text style={[styles.itemTitle,{fontSize:fontSizes.fs22}]}>User Name</Text>
-          <Text style={styles.itemEmail}>John@gmail.com</Text>
+          <Text style={[styles.itemTitle,{fontSize:fontSizes.fs22}]}>{capitalize(user.name)}</Text>
+          <Text style={styles.itemEmail}>{user.email}</Text>
         </View>
         {/* <Pressable style={styles.editBtn}>
           <Text style={styles.editBtnText}>Edit</Text>
@@ -250,6 +274,16 @@ const SettingScreen = ({ navigation }: any) => {
         <View>
           <Text style={styles.itemTitle}>Delete Account</Text>
           <Text style={styles.itemDesc}>Delete your account permanently</Text>
+        </View>
+      </Pressable>
+      <View style={styles.divider} />
+      <Pressable style={styles.item} onPress={logout}>
+        <View style={styles.imageContainer}>
+          <Image source={about} style={styles.itemIcon} />
+        </View>
+        <View>
+          <Text style={styles.itemTitle}>Logout</Text>
+          <Text style={styles.itemDesc}>Logout this app</Text>
         </View>
       </Pressable>
     </ScrollView>

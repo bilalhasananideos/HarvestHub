@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -16,8 +16,18 @@ import { logo, sms, eye, eyeOff, google, apple } from '../../assets';
 import { scale, typography } from '../../theme/typography';
 import { colors } from '../../theme/colors';
 import { fontSizes, hp, wp } from '../../theme/responsive';
-    
+import auth, { getAuth } from '@react-native-firebase/auth';
+import { registerApi } from '../../store/services/Services';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateUserStates } from '../../store/actions/UserActions';
+import { setItem } from '../../utils/localStorage';
+import {appleAuth} from '@invertase/react-native-apple-authentication';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+
 export default function SignUp({ navigation }: any) {
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.userReducer.user);
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,6 +41,21 @@ export default function SignUp({ navigation }: any) {
     password?: string;
     confirmPassword?: string;
   }>({});
+  const [isSocialLoading, setIsSocialLoading] = useState<'apple' | 'google' | ''>('');
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      scopes: [],
+      // scopes: ['openid', 'email', 'profile'],
+      webClientId: 
+        '943734294750-tegb8f7s9url0o2ih6iektkbd1a5ul81.apps.googleusercontent.com', // WEB CLIENT ID
+      iosClientId:
+        '943734294750-niro5qq2fahijsqeljd7n48fh39ho64v.apps.googleusercontent.com', // iOS CLIENT ID
+      offlineAccess: true,
+      forceCodeForRefreshToken: true,
+      profileImageSize: 120,
+    });
+  }, []);
 
   const validateForm = () => {
     const newErrors: {
@@ -69,19 +94,206 @@ export default function SignUp({ navigation }: any) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
+  
   const handleSignUp = async () => {
     if (!validateForm()) return;
     
     setLoading(true);
     try {
-      // Simulate API call
-      // await new Promise(resolve => setTimeout(resolve, 2000));
-      Alert.alert('Success', 'Account created successfully!');
-      navigation.navigate('SignIn');
+      // // Simulate API call
+      // // await new Promise(resolve => setTimeout(resolve, 2000));
+      // Alert.alert('Success', 'Account created successfully!');
+      // navigation.navigate('SignIn');
+      register()
     } catch (err: any) {
       Alert.alert('Error', err.message || 'Sign up failed');
     } finally {
+      // setLoading(false);
+    }
+  };
+
+  const firebaseRegister = async (email: string, password: string) => {
+    try {
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      return userCredential.user; // logged in user
+    } catch (error) {
+      console.log("Firebase Login Error:", error);
+      throw error;
+    }
+  };  
+
+  const register = async () => {
+
+    const firebaseUser = await firebaseRegister(email, password);
+ 
+    const firebaseToken = await firebaseUser.getIdToken();
+    // console.log("firebase", firebaseToken);
+
+    await registerApi({
+      name: name,
+      firebase_token: firebaseToken,
+      type: 'user'
+    })
+    .then((resp) => {
+      console.log("resp", resp)
+      if (resp.message != "Registration failed") {
+        // navigation.navigate('SignIn');
+        const authObj = {
+          user: { ...resp },
+          token: resp.access_token,
+          device_id: resp.device_id,
+        }
+        authObj['defaultRoute'] = 'Home';
+        setItem('key', authObj);
+        dispatch(updateUserStates({
+          isLoggedIn: true,
+          token: resp.access_token,
+          device_id: resp.device_id,
+          user: {
+              ...user,
+              ...resp.user
+          }
+        }));        
+      }
+      return null;
+    })
+    .catch((err) => {
+      console.log("err", err)
+    })
+    .finally(() => {
+      setLoading(false);
+    })
+  }
+
+  const onGoogleSignin = async () => {
+    setLoading(true)
+    try {
+      setIsSocialLoading('google');
+      await GoogleSignin.hasPlayServices();
+
+      const googleUser = await GoogleSignin.signIn();
+
+      const googleCredential = auth.GoogleAuthProvider.credential(googleUser?.data?.idToken);
+
+      const firebaseUser = await auth().signInWithCredential(googleCredential);
+
+      const firebaseIdToken = await firebaseUser.user.getIdToken();
+
+      const response = await registerApi({
+        firebase_token: firebaseIdToken,
+        type: "user",
+      });
+      console.log("API Response:", response);
+      if (response?.message === "User authenticated successfully") {
+        global.login == 'google'
+        const authObj = {
+          user: response.user,
+          token: response.access_token,
+          device_id: response.device_id,
+        }
+        authObj['defaultRoute'] = 'Home';
+        setItem('key', authObj);
+        dispatch(updateUserStates({
+          isLoggedIn: true,
+          token: response.access_token,
+          device_id: response.device_id,
+          user: {
+              ...user,
+              ...response.user
+          }
+        }));
+      }
+      else {
+        console.log("ersponse", response, response.message)
+      }
+    } catch (error: any) {
+      console.log("err", error)
+    } finally {
+      setIsSocialLoading('');
+      setLoading(false)
+    }
+  };
+
+  const onAppleSignin = async () => {
+    // https://harvest-hub-f93cf.firebaseapp.com/__/auth/handler
+    setLoading(true);
+    try {
+      if (!appleAuth.isSupported)
+        throw new Error(
+        'AppleAuth is not supported on the device. Currently Apple Authentication works on iOS devices running iOS 13 or later',
+      );
+      
+      // Start the sign-in request
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
+      });
+
+      // Ensure Apple returned a user identityToken
+      if (!appleAuthRequestResponse.identityToken) {
+        throw new Error('Apple Sign-In failed - no identify token returned');
+      }
+
+      // Create a Firebase credential from the response
+      const {identityToken, nonce, fullName} = appleAuthRequestResponse;
+      const appleCredential = auth.AppleAuthProvider.credential(
+        identityToken,
+        nonce,
+      );
+
+      // Firebase Sign-in
+      const firebaseUserCred = await auth().signInWithCredential(appleCredential);
+
+      // Get Firebase ID Token — used in your backend
+      const firebaseIdToken = await firebaseUserCred.user.getIdToken();
+
+      console.log("Apple Firebase User", firebaseUserCred);
+      console.log("Firebase ID Token", firebaseIdToken);
+
+      // Prepare your API payload
+      const payload = {
+        firebase_token: firebaseIdToken,
+        type: "user",
+      };
+
+      setIsSocialLoading("apple");
+
+      // Send backend login request
+      const response = await registerApi(payload);
+      console.log("API Response:", response);
+
+      // SUCCESS CASE (Same structure as Google)
+      if (response?.message === "User authenticated successfully") {
+        global.login = 'apple';   // FIXED — assignment
+
+        const authObj = {
+          user: response.user,
+          token: response.access_token,
+          device_id: response.device_id,
+          defaultRoute: "Home",
+        };
+
+        await setItem("key", authObj);
+
+        dispatch(updateUserStates({
+          isLoggedIn: true,
+          token: response.access_token,
+          device_id: response.device_id,
+          user: {
+            ...response.user
+          }
+        }));
+
+        console.log("Apple Login Success", authObj);
+      } 
+      else {
+        console.log("Apple Login Failed:", response?.message);
+      }
+
+    } catch (error) {
+      console.log('AppleAuthError------>', error);
+    } finally {
+      setIsSocialLoading('');
       setLoading(false);
     }
   };
@@ -223,10 +435,10 @@ export default function SignUp({ navigation }: any) {
           </View>
 
           <View style={styles.socialButtons}>
-            <TouchableOpacity onPress={()=>console.log('Google Sign In')} style={styles.socialButton}>
+            <TouchableOpacity onPress={onGoogleSignin} style={styles.socialButton}>
                 <Image source={google} style={styles.socialButton} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>console.log('Apple Sign In')} style={styles.socialButton}>
+                <TouchableOpacity onPress={onAppleSignin} style={styles.socialButton}>
                 <Image source={apple} style={styles.socialButton} />
               </TouchableOpacity>
           </View>

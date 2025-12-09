@@ -20,36 +20,76 @@ import { typography } from '../../theme/typography';
 import CacheImage from '../../components/CacheImage';
 import { arrowleft, star, truck, plus, sub } from '../../assets';
 
+// ui needs
+// product = {
+//   name: '',
+//   price: '',
+//   unit: '',
+//   availableQuantity: '',
+//   expiryDate: '',
+//   description: '',
+//   images: [array],
+// }
+
+// api response
+// item = {
+//   count: "70.00",
+//   description: "best qaulity mangoes",
+//   expiry_date: "2027-04-08",
+//   id: 1,
+//   price: "250.00",
+//   images: [
+//     { image_url: "..." },
+//     { image_url: "..." },
+//     { image_url: "..." }
+//   ],
+//   product: { name: "Mango" },
+//   unit: { name: "kg" }
+// }
+
 const ProductDetailScreen = ({ route }: any) => {
   const navigation = useNavigation();
+  const { item } = route.params;
+
   const [quantity, setQuantity] = useState(3);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isImageModalVisible, setImageModalVisible] = useState(false);
 
   // Watermelon product data (from your screenshot + many images)
+  // const product = {
+  //   name: 'Organic watermelon',
+  //   subtitle: 'chemical free.',
+  //   price: 8.99,
+  //   unit: 'kg',
+  //   availableQuantity: '26 kg',
+  //   expiryDate: '25 Oct 2025',
+  //   description:
+  //     'These juicy, seedless organic watermelons are grown naturally without any harmful chemicals or pesticides. Sweet, crisp, and refreshing, they are perfect for summer picnics, smoothies, or simply enjoying fresh.\n\nHarvested fresh from local farms, these watermelons deliver both rich flavor and natural nutrition straight to your table.',
+  //   images: [
+  //     'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=800',
+  //     'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
+  //     'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
+  //     'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
+  //     'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=800',
+  //     'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
+  //     'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=800',
+  //     'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
+  //     'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=800',
+  //     'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
+  //     'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=800',
+  //     'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
+  //   ],
+  // };
+  // Convert API structure to UI-friendly structure
   const product = {
-    name: 'Organic watermelon',
-    subtitle: 'chemical free.',
-    price: 8.99,
-    unit: 'kg',
-    availableQuantity: '26 kg',
-    expiryDate: '25 Oct 2025',
-    description:
-      'These juicy, seedless organic watermelons are grown naturally without any harmful chemicals or pesticides. Sweet, crisp, and refreshing, they are perfect for summer picnics, smoothies, or simply enjoying fresh.\n\nHarvested fresh from local farms, these watermelons deliver both rich flavor and natural nutrition straight to your table.',
-    images: [
-      'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=800',
-      'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
-      'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
-      'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
-      'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=800',
-      'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
-      'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=800',
-      'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
-      'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=800',
-      'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
-      'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=800',
-      'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800',
-    ],
+    name: item.product?.name || 'N/A',
+    subtitle: item.description || '',
+    price: Number(item.price) || 0,
+    unit: item.unit?.name || 'kg',
+    availableQuantity: item.count ? `${item.count} ${item.unit?.name}` : '',
+    expiryDate: item.expiry_date || '',
+    description: item.description || '',
+    images: item.images?.map(img => img.image_url) || [],
   };
 
   const handleQuantityChange = (change: number) => {
