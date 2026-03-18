@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  Keyboard,
 } from 'react-native';
 import { logo, sms, eye, eyeOff, google, apple } from '../../assets';
 import { scale, typography } from '../../theme/typography';
@@ -26,6 +27,11 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 export default function SignUp({ navigation }: any) {
   const dispatch = useDispatch();
+
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+  const confirmPasswordRef = useRef(null);
+
   const user = useSelector(state => state.userReducer.user);
 
   const [name, setName] = useState('');
@@ -50,7 +56,7 @@ export default function SignUp({ navigation }: any) {
       webClientId: 
         '943734294750-tegb8f7s9url0o2ih6iektkbd1a5ul81.apps.googleusercontent.com', // WEB CLIENT ID
       iosClientId:
-        '943734294750-niro5qq2fahijsqeljd7n48fh39ho64v.apps.googleusercontent.com', // iOS CLIENT ID
+        '943734294750-2b0s5seffmei1v7llmnjhjgvp38s1uk2.apps.googleusercontent.com', // iOS CLIENT ID
       offlineAccess: true,
       forceCodeForRefreshToken: true,
       profileImageSize: 120,
@@ -301,8 +307,12 @@ export default function SignUp({ navigation }: any) {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      // // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      // // keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      // behavior={Platform.OS === 'ios' ? 'padding' : "padding"}
+      // keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : -280}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : -280}
     >
       <ScrollView
         style={styles.scrollView}
@@ -332,6 +342,13 @@ export default function SignUp({ navigation }: any) {
                 }}
                 autoCapitalize="words"
                 autoCorrect={false}
+                returnKeyType='next'
+                blurOnSubmit={false}
+                onSubmitEditing={() => emailRef.current?.focus()}
+              autoCorrect={false}
+              autoComplete="off"
+              textContentType="none"
+              importantForAutofill="no"
               />
             </View>
             {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
@@ -342,6 +359,7 @@ export default function SignUp({ navigation }: any) {
             <View style={[styles.inputContainer, errors.email && styles.inputError]}>
               <Image source={sms} style={styles.inputIcon} />
               <TextInput
+                ref={emailRef}
                 style={styles.input}
                 placeholder="Enter your email"
                 placeholderTextColor={colors.text.hint}
@@ -353,6 +371,9 @@ export default function SignUp({ navigation }: any) {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                returnKeyType='next'
+                blurOnSubmit={false}
+                onSubmitEditing={() => passwordRef.current?.focus()}
               />
             </View>
             {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
@@ -363,6 +384,7 @@ export default function SignUp({ navigation }: any) {
             <View style={[styles.inputContainer, errors.password && styles.inputError]}>
               <Image source={sms} style={styles.inputIcon} />
               <TextInput
+                ref={passwordRef}
                 style={styles.input}
                 placeholder="Create a strong password"
                 placeholderTextColor={colors.text.hint}
@@ -373,6 +395,11 @@ export default function SignUp({ navigation }: any) {
                 }}
                 secureTextEntry={!showPassword}
                 autoCorrect={false}
+                returnKeyType='next'
+                blurOnSubmit={false}
+                onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+              textContentType="newPassword"
+              autoComplete="password-new"
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -392,6 +419,7 @@ export default function SignUp({ navigation }: any) {
             <View style={[styles.inputContainer, errors.confirmPassword && styles.inputError]}>
               <Image source={sms} style={styles.inputIcon} />
               <TextInput
+                ref={confirmPasswordRef}
                 style={styles.input}
                 placeholder="Confirm your password"
                 placeholderTextColor={colors.text.hint}
@@ -402,6 +430,8 @@ export default function SignUp({ navigation }: any) {
                 }}
                 secureTextEntry={!showConfirmPassword}
                 autoCorrect={false}
+                returnKeyType='done'
+                onSubmitEditing={() => Keyboard.dismiss()}
               />
               <TouchableOpacity
                 style={styles.eyeButton}

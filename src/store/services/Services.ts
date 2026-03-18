@@ -6,11 +6,43 @@ export const socialLoginApi = (data: any) => post(`/social/login`, JSON.stringif
 export const socialRegisterApi = (data: any) => post(`/social/register`, JSON.stringify(data));
 
 export const registerApi = (data: any) => post(`/login-register`, JSON.stringify(data));
+export const guestLoginApi = () => post(`/guest/login`);
 export const logoutApi = (data: any) => post(`/logout`, JSON.stringify(data));
 
-export const getHomeApi = () => get(`/user/home-screen`);
-export const getVendorListApi = () => get(`/user/vendor/list`);
+// export const getHomeApi = () => get(`/user/home-screen`);
+export const getHomeApi = ({ latitude, longitude }) => {
+    // Building the query string based on optional latitude and longitude
+    let url = `/user/home-screen`;
+    if (latitude && longitude) {
+      url = `/user/home-screen?latitude=${latitude}&longitude=${longitude}`;
+    }
+    return get(url); // Call the GET API with the URL
+  };
+// export const getVendorListApi = () => get(`/user/vendor/list`);
+// api file
+export const getVendorListApi = (params?: {
+  category_id?: string | number;
+  product_id?: string | number;
+}) => {
+  if (params?.category_id) {
+    return get(`/user/vendor/list?category_id=${params.category_id}`);
+  }
+
+  if (params?.product_id) {
+    return get(`/user/vendor/list?product_id=${params.product_id}`);
+  }
+
+  return get(`/user/vendor/list`);
+};
+
+export const searchVendorsApi = (params: any) =>
+  get(`/user/vendors/search`, params);
+
+// profile apis
 export const getProfileApi = () => get(`/verify`);
+export const profileUpdateApi = (data: any) => post(`/user/profile/update`, data, {}, true);
+
+
 // /user/vendor/profile/10?products=true&reviews=true
 export const getVendorProfileApi = (id: string, params = {}) => get(`/user/vendor/profile/${id}`, params);
 
@@ -33,12 +65,30 @@ export const visitFarmApi = (data: any) => post(`/user/farm-visit/request`, JSON
 //         ]);
 export const addFarmReviewApi = (data: any) => post(`/user/vendor/review`, JSON.stringify(data));
 
+export const searchVendorProductsApi = (vendorId: string, params = {}) =>
+  get(`/vendor/${vendorId}/products`, params);
 
 
+// cart apis
+export const addtoCartApi = (data: any) => post(`/user/cart/add`, JSON.stringify(data));
+export const updatetoCartApi = (data: any) => post(`/user/cart/update`, JSON.stringify(data));
+export const getCartApi = () => get(`/user/cart`);
+export const deleteCartApi = (id: string) => deleting(`/user/cart/remove/${id}`);
 
+// order create & listing
+export const createOrderApi = (data: any) => post(`/user/order/create`, JSON.stringify(data));
+export const intentPaymentStripeApi = (data: any) => post(`/user/stripe/payment-intent/create`, JSON.stringify(data));
+export const getMyOrdersApi = (params: any) =>
+  get(`/user/order/list?new=${params.new}&in_progress=${params.in_progress}&shipped=${params.shipped}`);
+export const sendfcmTokenApi = (data: any) => post(`/user/save-fcm`, JSON.stringify(data));
 
-
-
+// chat apis
+export const getChatListApi = () => get(`/user/conversations`);
+export const startChatApi = (data: any) => post(`/conversations`, JSON.stringify(data));
+export const messageSendApi = (uuid: string, text: string) => post(`/conversations/${uuid}/metadata`, JSON.stringify({
+  text: text
+}));
+export const messageReadApi = (uuid: string) => post(`/conversations/${uuid}/mark-read`);
 
 export const getInfoApi = () => get(`/info`);
 export const getFranchiseApi = () => get(`/franchises`);

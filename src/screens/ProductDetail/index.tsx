@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Modal,
   Pressable,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,6 +20,7 @@ import { hp, wp, scale } from '../../theme/responsive';
 import { typography } from '../../theme/typography';
 import CacheImage from '../../components/CacheImage';
 import { arrowleft, star, truck, plus, sub } from '../../assets';
+import { addtoCartApi, deleteCartApi, getCartApi } from '../../store/services/Services';
 
 // ui needs
 // product = {
@@ -50,10 +52,12 @@ import { arrowleft, star, truck, plus, sub } from '../../assets';
 const ProductDetailScreen = ({ route }: any) => {
   const navigation = useNavigation();
   const { item } = route.params;
+  console.log('item', item)
 
-  const [quantity, setQuantity] = useState(3);
+  const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isImageModalVisible, setImageModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Watermelon product data (from your screenshot + many images)
   // const product = {
@@ -89,7 +93,10 @@ const ProductDetailScreen = ({ route }: any) => {
     availableQuantity: item.count ? `${item.count} ${item.unit?.name}` : '',
     expiryDate: item.expiry_date || '',
     description: item.description || '',
-    images: item.images?.map(img => img.image_url) || [],
+    images: item.images?.map(img => img.image) || [],
+    id: item.id,
+    product_id: item.product_id,
+    vendor_id: item.vendor_id,
   };
 
   const handleQuantityChange = (change: number) => {
@@ -100,8 +107,59 @@ const ProductDetailScreen = ({ route }: any) => {
   const openImageModal = () => setImageModalVisible(true);
   const closeImageModal = () => setImageModalVisible(false);
 
-  const handleAddToCart = () => {
-    Alert.alert('Success', `${quantity}kg Organic Watermelon added to cart!`);
+  // const handleAddToCart = async () => {
+  //   try {
+  //     setLoading(true);
+
+  //     const response = await addtoCartApi({
+  //       vendor_product_id: item?.id,
+  //       quantity,
+  //     })
+  //     console.log("response", response);
+  //     if (response.message == "Added to cart") {
+  //       navigation.navigate('Cart');
+  //     }
+  //   } catch (err) {
+  //     console.log("err", err)
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const handleAddToCart = async () => {
+    try {
+      setLoading(true);
+  
+      const cart = await getCartApi();
+      const items = cart.items || [];
+  
+      if (items.length > 0 && items[0].vendor_product.vendor_id !== product.vendor_id) {
+        Alert.alert(
+          "Replace Cart Items?",
+          "Your cart has items from another vendor. Do you want to remove them and add this item?",
+          [
+            { text: "Cancel", style: "cancel" },
+            { 
+              text: "Yes", 
+              onPress: async () => {
+                await Promise.all(items.map(i => deleteCartApi(i.id)));
+                await addtoCartApi({ vendor_product_id: product.id, quantity });
+                navigation.navigate("Cart");
+              } 
+            }
+          ]
+        );
+        return;
+      }
+  
+      // Same vendor → add normally
+      await addtoCartApi({ vendor_product_id: product.id, quantity });
+      navigation.navigate("Cart");
+  
+    } catch (err) {
+      console.log("Add to cart error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Render thumbnail
@@ -119,6 +177,12 @@ const ProductDetailScreen = ({ route }: any) => {
 
   return (
     <View style={styles.container}>
+      {/* Overlay Loader */}
+      {loading && (
+        <View style={styles.loaderOverlay}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+        </View>
+      )}
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* Image Section */}
@@ -227,6 +291,18 @@ const ProductDetailScreen = ({ route }: any) => {
 // ==================== STYLES ====================
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff',marginTop:hp("1q") },
+  
+  loaderOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // semi-transparent
+    zIndex: 999,
+  },
 
   // Header
   header: {

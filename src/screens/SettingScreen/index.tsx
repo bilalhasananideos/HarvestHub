@@ -8,7 +8,7 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { scale, typography } from '../../theme/typography';
 import {
@@ -29,14 +29,57 @@ import { colors } from '../../theme/colors';
 import CacheImage from '../../components/CacheImage';
 import { useDispatch, useSelector } from 'react-redux';
 import { capitalize } from '../../utils/utils';
-import { removeItem } from '../../utils/localStorage';
-import { resetUserState } from '../../store/actions/UserActions';
+import { getItem, removeItem, setItem } from '../../utils/localStorage';
+import { resetUserState, updateUserStates } from '../../store/actions/UserActions';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import { useFocusEffect } from '@react-navigation/native';
+import { getProfileApi } from '../../store/services/Services';
 
 const SettingScreen = ({ navigation }: any) => {
   const bottomTabNavigation = useNavigation<any>();
   const dispatch = useDispatch();
   const user = useSelector(state => state.userReducer.user);
+
+  useFocusEffect(
+    useCallback(() => {
+      getProfile();
+    }, [])
+  );
+
+  const getProfile = async () => {
+    try {
+      const res = await getProfileApi();
+      console.log("res", res)
+      if (res?.id) {
+
+        // 1️⃣ Redux update (merge old + new user data)
+        dispatch(updateUserStates({
+          user: {
+            ...user,        // existing redux user
+            ...res     // new profile data
+          }
+        }));
+  
+        // 2️⃣ AsyncStorage update (optional but recommended)
+        const existingAuth = await getItem('key');
+  
+        if (existingAuth) {
+          const updatedAuth = {
+            ...existingAuth,
+            user: {
+              ...existingAuth.user,
+              ...res
+            }
+          };
+  
+          await setItem('key', updatedAuth);
+        }
+        console.log("Profile updated successfully ✅");
+      }
+    } catch (error) {
+      console.log('Profile error', error);
+    }
+  };
 
   // Web link handlers
   const openWebLink = async (url: string) => {
@@ -139,7 +182,7 @@ const SettingScreen = ({ navigation }: any) => {
     >
       {/* Profile Section */}
       <View style={styles.profileContainer}>
-        <CacheImage url={'https://randomuser.me/api/portraits/men/1.jpg'} style={styles.profileImage} />
+        <CacheImage url={user.image != null ? user.image : 'https://randomuser.me/api/portraits/men/1.jpg'} style={styles.profileImage} />
         <View style={{marginLeft:scale(1),flex:1}}>
           <Text style={[styles.itemTitle,{fontSize:fontSizes.fs22}]}>{capitalize(user.name)}</Text>
           <Text style={styles.itemEmail}>{user.email}</Text>
@@ -155,7 +198,7 @@ const SettingScreen = ({ navigation }: any) => {
       
       <View style={styles.divider} />
       {/* Account Section */}
-      <Text style={styles.sectionTitle}>Account</Text>
+      {/* <Text style={styles.sectionTitle}>Account</Text> */}
       <Pressable
         style={styles.item}
         onPress={() => navigation.navigate('AllOrdersScreen')}
@@ -168,6 +211,8 @@ const SettingScreen = ({ navigation }: any) => {
           <Text style={styles.itemDesc}>Your active and history of orders</Text>
         </View>
       </Pressable>
+
+      <View style={styles.divider} />
 
       {/* Preferences Section */}
       <Text style={styles.sectionTitle}>Preferences</Text>
@@ -196,6 +241,8 @@ const SettingScreen = ({ navigation }: any) => {
           <Text style={styles.itemDesc}>Change your password</Text>
         </View>
       </Pressable>
+
+      <View style={styles.divider} />
 
       {/* Support Section */}
       <Text style={styles.sectionTitle}>Support</Text>
@@ -320,9 +367,9 @@ const styles = StyleSheet.create({
     borderRadius: wp('100'),
   },
   sectionTitle: {
-    fontSize: fontSizes.fs25,
+    fontSize: fontSizes.fs20,
     fontFamily: typography.fontFamily.Medium,
-    marginTop: scale(1),
+    marginTop: scale(5),
     marginBottom: scale(0.5),
     color: '#222',
   },
@@ -333,7 +380,7 @@ const styles = StyleSheet.create({
     marginLeft: scale(0.5),
   },
   itemTitle: {
-    fontSize: fontSizes.fs18,
+    fontSize: fontSizes.fs15,
     // fontSize:scale(18),
     fontWeight: '500',
     color: 'rgba(40, 42, 46, 1)',

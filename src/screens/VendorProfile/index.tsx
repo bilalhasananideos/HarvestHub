@@ -12,6 +12,7 @@ import {
   NativeSyntheticEvent,
   Platform,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -36,7 +37,11 @@ import {
   clock,
   note,
 } from '../../assets';
-import { getVendorProfileApi, visitFarmApi } from '../../store/services/Services';
+import { addtoCartApi, deleteCartApi, getCartApi, getVendorProfileApi, searchVendorProductsApi, visitFarmApi } from '../../store/services/Services';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import moment from 'moment';
+import { COLORS, FONTS } from '../../constants';
+import { capitalize } from '../../utils/utils';
 
 const VendorProfile = ({ route }: any) => {
   const navigation = useNavigation<any>();
@@ -175,6 +180,7 @@ const VendorProfile = ({ route }: any) => {
 
   const tabs = ['Products', 'Reviews', 'Farm visit'];
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
   
   // const [vendorInfo, setVendorInfo] = useState(null);
   const [vendorInfo, setVendorInfo] = useState({
@@ -190,6 +196,43 @@ const VendorProfile = ({ route }: any) => {
   const [reviews1, setReviews] = useState([]);
   const [ratingBreakdown1, setRatingBreakdown] = useState({ 1:0, 2:0, 3:0, 4:0, 5:0 });
 
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
+
+  // DATE
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirmDate = (date: Date) => {
+    setFarmVisitForm({
+      ...farmVisitForm,
+      date: moment(date).format("YYYY-MM-DD"),
+    });
+    hideDatePicker();
+  };
+
+  // TIME
+  const showTimePicker = () => {
+    setTimePickerVisibility(true);
+  };
+
+  const hideTimePicker = () => {
+    setTimePickerVisibility(false);
+  };
+
+  const handleConfirmTime = (time: Date) => {
+    setFarmVisitForm({
+      ...farmVisitForm,
+      time: moment(time).format("HH:mm"),
+    });
+    hideTimePicker();
+  };
+
   useEffect(() => {
     getVendorProfile();
   }, [activeTab])
@@ -201,8 +244,8 @@ const VendorProfile = ({ route }: any) => {
       let params: any = {};
 
       if (activeTab === "Products") params = { products: true };
-      if (activeTab === "Reviews") params = { reviews: true };  
-      
+      if (activeTab === "Reviews") params = { reviews: true };
+      if (activeTab === 'Farm visit') return null;
       const resp = await getVendorProfileApi(vendorProfileId, params);
       console.log("Api resp", resp);
             
@@ -297,6 +340,92 @@ const VendorProfile = ({ route }: any) => {
     }
   }
 
+  // searchVendorProductsApi(vendorId, {
+  //   search: "mango",
+  //   page: 1,
+  //   limit: 10
+  // })
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      if (search.trim()) {
+        fetchProducts(search);
+      }
+    }, 1500);
+  
+    return () => clearTimeout(delay);
+  
+  }, [search]);
+  
+  const fetchProducts = async (query = '') => {
+    try {
+      setLoading(true);
+  
+      const resp = await searchVendorProductsApi(vendorInfo.id, {
+        search: query
+      });
+      console.log('res', resp)
+  
+      const mapped = resp?.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        description: item.description,
+        availableQty: item.available_qty
+      })) || [];
+  
+      setProducts(mapped);
+  
+    } catch (error) {
+      console.log('Product search error', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddToCart = async (item) => {
+    try {
+      setLoading(true);
+  
+      // 1️⃣ Get current cart
+      const cart = await getCartApi();
+      const items = cart.items || [];
+      // console.log("item", items)
+  
+      // 2️⃣ Check if cart has items from a different vendor
+      if (items.length > 0 && items[0].vendor_product.vendor_id !== item.vendor_id) {
+        // show alert
+        Alert.alert(
+          "Replace Cart Items?",
+          "Your cart has items from another vendor. Do you want to remove them and add this item?",
+          [
+            { text: "Cancel", style: "cancel" },
+            { 
+              text: "Yes", 
+              onPress: async () => {
+                // remove previous items
+                await Promise.all(items.map(i => deleteCartApi(i.id)));
+                // add current item
+                await addtoCartApi({ vendor_product_id: item.id, quantity: 1 });
+              } 
+            }
+          ]
+        );
+        return; // exit function
+      }
+  
+      // 3️⃣ If same vendor or cart empty → add normally
+      await addtoCartApi({ vendor_product_id: item.id, quantity: 1 });
+  
+      // ToastAndroid.show("Added to cart", ToastAndroid.SHORT);
+  
+    } catch (error) {
+      console.log("Cart error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     // When scrolled past the vendor section (including tabs), make tabs sticky
@@ -347,7 +476,10 @@ const VendorProfile = ({ route }: any) => {
     >
       <View style={styles.productImageContainer}>
         <CacheImage url={item.images?.[0]?.image} style={styles.productImage} />
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => handleAddToCart(item)}
+        >
           <Image source={plus} style={styles.addButtonIcon} />
          </TouchableOpacity>
       </View>  
@@ -509,6 +641,8 @@ const VendorProfile = ({ route }: any) => {
                 style={styles.searchInput}
                 placeholder="Search term OR browse categories"
                 placeholderTextColor={colors.text.secondary}
+                value={search}
+                onChangeText={setSearch}
               />
             </View>
             <TouchableOpacity style={styles.filterButton}>
@@ -596,17 +730,19 @@ const VendorProfile = ({ route }: any) => {
 
             {/* Individual Reviews */}
             <View style={styles.reviewsList}>
-              {reviews.map(review => (
-              // {reviews1.length === 0 ? (
-              //   <Text>No reviews yet</Text>
-              // ) : (
-              //   reviews1.map(review => (
+              {/* {reviews.map(review => ( */}
+              {reviews1.length === 0 ? (
+                <Text>No reviews yet</Text>
+              ) : (
+                reviews1.map(review => (
                   <View key={review.id} style={styles.reviewItem}>
-                    <CacheImage url={review.avatar} style={styles.reviewAvatar} />
+                    {/* <CacheImage url={review.avatar} style={styles.reviewAvatar} /> */}
+                    <CacheImage url={review?.user?.image} style={styles.reviewAvatar} />
                     <View style={styles.reviewContent}>
                       <View style={styles.reviewHeader}>
                         <View style={styles.reviewHeaderLeft}>
-                          <Text style={styles.reviewName}>{review.name}</Text>
+                          {/* <Text style={styles.reviewName}>{review.name}</Text> */}
+                          <Text style={styles.reviewName}>{capitalize(review?.user?.name)}</Text>
                           <View style={styles.reviewStars}>
                             {[1, 2, 3, 4, 5].map(starNum => (
                               <Image
@@ -621,18 +757,20 @@ const VendorProfile = ({ route }: any) => {
                               />
                             ))}
                           </View>
-                          <Text style={styles.reviewTime}>{review.time}</Text>
+                          {/* <Text style={styles.reviewTime}>{review.time}</Text> */}
+                          <Text style={styles.reviewTime}>{moment(review.created_at).fromNow()}</Text>
                         </View>
                         <TouchableOpacity>
                           <Text style={styles.reviewMenu}>⋯</Text>
                         </TouchableOpacity>
                       </View>
-                      <Text style={styles.reviewText}>{review.text}</Text>
+                      {/* <Text style={styles.reviewText}>{review.text}</Text> */}
+                      <Text style={styles.reviewText}>{capitalize(review?.review)}</Text>
                     </View>
                   </View>
-              //   ))
-              // )}
-              ))}
+                ))
+              )}
+              {/* ))} */}
             </View>
 
             {/* Write Review Button */}
@@ -680,11 +818,18 @@ const VendorProfile = ({ route }: any) => {
                       placeholder="Select date"
                       placeholderTextColor={colors.text.secondary}
                       value={farmVisitForm.date}
-                      onChangeText={text =>
-                        setFarmVisitForm({ ...farmVisitForm, date: text })
-                      }
+                      editable={false}
+                      onPressIn={showDatePicker}
                     />
                   </View>
+
+                  <DateTimePickerModal
+                    isVisible={isDatePickerVisible}
+                    mode="date"
+                    minimumDate={new Date()}
+                    onConfirm={handleConfirmDate}
+                    onCancel={hideDatePicker}
+                  />
 
                   <View style={styles.inputContainer}>
                     <Image source={clock} style={styles.inputIcon} />
@@ -693,11 +838,18 @@ const VendorProfile = ({ route }: any) => {
                       placeholder="Select time"
                       placeholderTextColor={colors.text.secondary}
                       value={farmVisitForm.time}
-                      onChangeText={text =>
-                        setFarmVisitForm({ ...farmVisitForm, time: text })
-                      }
+                      editable={false}
+                      onPressIn={showTimePicker}
                     />
                   </View>
+
+                  <DateTimePickerModal
+                    isVisible={isTimePickerVisible}
+                    mode="time"
+                    is24Hour={true}
+                    onConfirm={handleConfirmTime}
+                    onCancel={hideTimePicker}
+                  />
 
                   <View style={styles.inputContainer}>
                     <Image source={note} style={styles.inputIcon} />

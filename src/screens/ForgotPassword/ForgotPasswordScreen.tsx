@@ -50,7 +50,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 
     try {
       // const result = await resetPassword(email.trim());
-      
+
       // if (result.success) {
       //   setEmailSent(true);
       //   Alert.alert(
@@ -83,19 +83,22 @@ export default function ForgotPasswordScreen({ navigation }: any) {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      // keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : -280}
     >
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
-        <ImageBackground
+        {/* <ImageBackground
           source={loginImage}
           style={styles.bgImage}
           imageStyle={styles.bgImageStyle}
-        >
+        > */}
+        <View style={styles.bgImage}>
           <Image source={logo} style={styles.logo} />
 
           <View style={styles.content}>
@@ -108,13 +111,14 @@ export default function ForgotPasswordScreen({ navigation }: any) {
               <Image source={sms} style={styles.icon} />
               <TextInput
                 style={styles.input}
-                placeholder="E-mail"
+                placeholder="Enter your email"
                 placeholderTextColor="#888"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={!emailSent}
+                returnKeyType='done'
               />
             </View>
 
@@ -149,7 +153,8 @@ export default function ForgotPasswordScreen({ navigation }: any) {
               <Text style={styles.loginLinkText}>Back to Login</Text>
             </TouchableOpacity>
           </View>
-        </ImageBackground>
+          {/* </ImageBackground> */}
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -158,7 +163,8 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E7FFDD',
+    // backgroundColor: '#E7FFDD',
+    backgroundColor: colors.background.default,
   },
   logo: {
     width: wp('33'),
@@ -170,7 +176,8 @@ const styles = StyleSheet.create({
   },
   bgImage: {
     height: screenHeight,
-    justifyContent: 'flex-end',
+    // justifyContent: 'flex-end',
+    justifyContent: 'center'
   },
   bgImageStyle: {
     width: wp('80'),
@@ -179,7 +186,8 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: wp(5),
-    paddingBottom: hp(2),
+    // paddingBottom: hp(2),
+    paddingTop: hp(15)
   },
   heading: {
     fontSize: scale(30),
@@ -198,8 +206,8 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: '100%',
     flexDirection: 'row',
-    backgroundColor: '#F6FFF1',
-    borderRadius: wp(8),
+    // backgroundColor: '#F6FFF1',
+    borderRadius: wp(4),
     borderWidth: 1,
     borderColor: '#D2E5C4',
     paddingHorizontal: wp(4),
@@ -222,9 +230,10 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     width: '100%',
-    // backgroundColor: colors.secondary.main,
-    backgroundColor: colors.background.dark,
-    borderRadius: wp(8),
+    // // backgroundColor: colors.secondary.main,
+    // backgroundColor: colors.background.dark,
+    backgroundColor: colors.primary.main,
+    borderRadius: wp(4),
     paddingVertical: hp(2),
     alignItems: 'center',
     marginBottom: hp(1),

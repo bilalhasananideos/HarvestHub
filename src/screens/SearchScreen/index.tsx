@@ -8,6 +8,7 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { hp, wp } from '../../theme/responsive';
 import { colors } from '../../theme/colors';
@@ -16,7 +17,7 @@ import { typography } from '../../theme/typography';
 import CacheImage from '../../components/CacheImage';
 import { filter, star, location, homeFill } from '../../assets';
 import { useDispatch, useSelector } from 'react-redux';
-import { getVendorListApi } from '../../store/services/Services';
+import { getVendorListApi, searchVendorsApi } from '../../store/services/Services';
 import { useFocusEffect } from '@react-navigation/native';
 
 type Farmer = {
@@ -94,7 +95,7 @@ const demoFarmers: Farmer[] = [
 
 type SortOption = 'rating_desc' | 'distance_asc' | 'name_asc';
 
-const SearchScreen = ({navigation}:any) => {
+const SearchScreen = ({ navigation }: any) => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.userReducer.user);
 
@@ -102,90 +103,225 @@ const SearchScreen = ({navigation}:any) => {
   const [sortOpen, setSortOpen] = useState(false);
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [loading, setLoading] = useState(false);
-  const [sortOption, setSortOption] = useState<SortOption>('rating_desc');
+  // const [sortOption, setSortOption] = useState<SortOption>('rating_desc');
+
+  const [sortType, setSortType] = useState<'AZ' | 'ZA' | null>(null);
+  const [distance, setDistance] = useState<number | null>(null);
+  const [rating, setRating] = useState<number | null>(null);
+  // const [filtered1, setFiltered1] = useState(filtered)
 
   // useEffect(() => {
   //   getExploreData();
   // }, [])
-  useFocusEffect(
-    useCallback(() => {
-      getExploreData();
-  
-      return () => {
-        // optional cleanup when leaving screen
-      };
-    }, [])
-  );
-  
-  const getExploreData = async () => {
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     getExploreData();
+
+  //     return () => {
+  //       // optional cleanup when leaving screen
+  //     };
+  //   }, [])
+  // );
+
+  // const getExploreData = async () => {
+  //   try {
+  //     setLoading(true);
+
+  //     const resp = await getVendorListApi();
+  //     console.log("Api resp", resp);
+
+  //     // API data ko Farmer model ke andar map karna
+  //     const apiFarmers: Farmer[] = resp?.map((item: any) => ({
+  //       // id: item.id.toString(),
+  //       id: item.id,
+  //       name: item.name,
+  //       rating: item.average_rating ? Number(item.average_rating) : 0,
+  //       reviews: item.total_reviews ?? 0,
+  //       distanceMiles: item.distance ? Number(item.distance) : 0,
+  //       visitAvailable: item.farm_visit === 1,
+  //       image: item.image,
+  //     }));
+
+  //     setFarmers(apiFarmers);
+  //   } catch (err) {
+  //     console.log("err", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // show demo data
+  // const filtered = useMemo(() => {
+  //   const q = query.trim().toLowerCase();
+  //   const base = q
+  //     ? demoFarmers.filter((f) => f.name.toLowerCase().includes(q))
+  //     : demoFarmers.slice();
+
+  //   switch (sortOption) {
+  //     case 'distance_asc':
+  //       return base.sort((a, b) => a.distanceMiles - b.distanceMiles);
+  //     case 'name_asc':
+  //       return base.sort((a, b) => a.name.localeCompare(b.name));
+  //     case 'rating_desc':
+  //     default:
+  //       return base.sort((a, b) => b.rating - a.rating);
+  //   }
+  // }, [query, sortOption]);
+
+  // const filtered = useMemo(() => {
+  //   const q = query.trim().toLowerCase();
+
+  //   // Search
+  //   const base = q
+  //     ? farmers.filter((f) => f.name.toLowerCase().includes(q))
+  //     : farmers.slice();
+
+  //   // Sorting
+  //   switch (sortOption) {
+  //     case 'distance_asc':
+  //       return base.sort((a, b) => a.distanceMiles - b.distanceMiles);
+
+  //     case 'name_asc':
+  //       return base.sort((a, b) => a.name.localeCompare(b.name));
+
+  //     case 'rating_desc':
+  //     default:
+  //       return base.sort((a, b) => b.rating - a.rating);
+  //   }
+  // }, [query, sortOption, farmers]);
+
+  // const filtered = useMemo(() => {
+  //   // let data = [...farmers];
+
+  //   // // 🔍 Search
+  //   // if (query.trim()) {
+  //   //   const q = query.trim().toLowerCase();
+  //   //   data = data.filter(f =>
+  //   //     f.name.toLowerCase().includes(q)
+  //   //   );
+  //   // }
+
+  //   // // 🔤 Alphabetical Sort
+  //   // if (sortType === 'AZ') {
+  //   //   data.sort((a, b) => a.name.localeCompare(b.name));
+  //   // }
+
+  //   // if (sortType === 'ZA') {
+  //   //   data.sort((a, b) => b.name.localeCompare(a.name));
+  //   // }
+
+  //   // // 📍 Distance Filter
+  //   // data = data.filter(item => item.distanceMiles <= distance);
+
+  //   // // ⭐ Rating Filter
+  //   // if (rating) {
+  //   //   data = data.filter(item => item.rating >= rating);
+  //   // }
+
+  //   // return data;
+
+  // }, [farmers, query, sortType, distance, rating]);    
+
+  // useEffect(() => {
+
+  //   if (
+  //     query.trim() !== '' ||
+  //     rating !== null ||
+  //     distance !== null ||
+  //     sortType !== null
+  //   ) {
+  //     fetchVendors();
+  //   }
+
+  // }, [query, rating, distance, sortType]);
+
+  // 🔥 API CALL FUNCTION
+  const fetchVendors = async () => {
     try {
       setLoading(true);
-      
-      const resp = await getVendorListApi();
-      console.log("Api resp", resp);
-      
-      // API data ko Farmer model ke andar map karna
-      const apiFarmers: Farmer[] = resp?.map((item: any) => ({
-        // id: item.id.toString(),
+
+      const params: any = {};
+
+      if (query.trim()) params.search = query;
+      if (rating) params.rating = rating;
+      if (distance) params.mile = distance;
+
+      if (sortType === 'AZ') params.sort = 'asc';
+      if (sortType === 'ZA') params.sort = 'desc';
+
+      // distance filter ke liye location bhejna zaroori
+      if (distance) {
+        params.latitude = user?.latitude;
+        params.longitude = user?.longitude;
+      }
+
+      console.log("Sending Params:", params);
+
+      const resp = await searchVendorsApi(params);
+      console.log('res', resp)
+
+      const mapped: Farmer[] = resp?.map((item: any) => ({
         id: item.id,
         name: item.name,
-        rating: item.average_rating ? Number(item.average_rating) : 0,
+        rating: Number(item.average_rating ?? 0),
         reviews: item.total_reviews ?? 0,
-        distanceMiles: item.distance ? Number(item.distance) : 0,
+        distanceMiles: Number(item.distance ?? 0),
         visitAvailable: item.farm_visit === 1,
         image: item.image,
       }));
-      
-      setFarmers(apiFarmers);
-    } catch (err) {
-      console.log("err", err);
+
+      setFarmers(mapped);
+
+    } catch (error) {
+      console.log("Search Error", error);
     } finally {
       setLoading(false);
     }
   };
 
-    // const filtered = useMemo(() => {
-    //   const q = query.trim().toLowerCase();
-    //   const base = q
-    //     ? demoFarmers.filter((f) => f.name.toLowerCase().includes(q))
-    //     : demoFarmers.slice();
-  
-    //   switch (sortOption) {
-    //     case 'distance_asc':
-    //       return base.sort((a, b) => a.distanceMiles - b.distanceMiles);
-    //     case 'name_asc':
-    //       return base.sort((a, b) => a.name.localeCompare(b.name));
-    //     case 'rating_desc':
-    //     default:
-    //       return base.sort((a, b) => b.rating - a.rating);
-    //   }
-    // }, [query, sortOption]);
-  
-    const filtered = useMemo(() => {
-      const q = query.trim().toLowerCase();
-  
-      // Search
-      const base = q
-        ? farmers.filter((f) => f.name.toLowerCase().includes(q))
-        : farmers.slice();
-  
-      // Sorting
-      switch (sortOption) {
-        case 'distance_asc':
-          return base.sort((a, b) => a.distanceMiles - b.distanceMiles);
-  
-        case 'name_asc':
-          return base.sort((a, b) => a.name.localeCompare(b.name));
-  
-        case 'rating_desc':
-        default:
-          return base.sort((a, b) => b.rating - a.rating);
+  // debounce function
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      if (query.trim()) {
+        fetchVendors();
       }
-    }, [query, sortOption, farmers]);
+    }, 1500);
 
+    return () => clearTimeout(delay);
+
+  }, [query]);
+
+
+  // const applyFilters = () => {
+  //   let updated = [...filtered1]
+
+  //   // Alphabetical
+  //   if (sortType === 'AZ') {
+  //     updated.sort((a, b) => a.name.localeCompare(b.name))
+  //   }
+
+  //   if (sortType === 'ZA') {
+  //     updated.sort((a, b) => b.name.localeCompare(a.name))
+  //   }
+
+  //   // Distance
+  //   updated = updated.filter(item => item.distanceMiles <= distance)
+
+  //   // Rating
+  //   if (rating) {
+  //     updated = updated.filter(item => item.rating >= rating)
+  //   }
+
+  //   setFiltered1(updated)
+  // }    
+
+  const applyFilters = () => {
+    fetchVendors();
+    setSortOpen(false);
+  };
 
   const renderCard = ({ item }: { item: Farmer }) => (
-    <TouchableOpacity onPress={()=>navigation.navigate('VendorProfile', {
+    <TouchableOpacity onPress={() => navigation.navigate('VendorProfile', {
       vendorProfileId: item.id
     })} style={styles.card}>
       <CacheImage url={item.image} style={styles.cardImage} />
@@ -250,7 +386,7 @@ const SearchScreen = ({navigation}:any) => {
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Explore Farmers</Text>
         <View>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.sortBtn}
             onPress={() => setSortOpen((s) => !s)}
           >
@@ -261,8 +397,8 @@ const SearchScreen = ({navigation}:any) => {
                 ? 'Sort: Distance'
                 : 'Sort: Name'}
             </Text>
-          </TouchableOpacity>
-          {sortOpen && (
+          </TouchableOpacity> */}
+          {/* {sortOpen && (
             <View style={styles.sortMenu}>
               <TouchableOpacity
                 style={styles.sortMenuItem}
@@ -292,20 +428,109 @@ const SearchScreen = ({navigation}:any) => {
                 <Text style={styles.sortMenuText}>Name (A → Z)</Text>
               </TouchableOpacity>
             </View>
-          )}
+          )} */}
         </View>
       </View>
 
       {/* Grid list */}
       <FlatList
-        data={filtered}
+        // data={filtered}
+        data={farmers}
         renderItem={renderCard}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item?.id}
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
+      <Modal
+        visible={sortOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSortOpen(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setSortOpen(false)}
+        >
+          <View style={styles.modalContainer}>
+
+            <Text style={styles.modalTitle}>Sort Results By</Text>
+
+            {/* Alphabetical */}
+            <Text style={styles.modalLabel}>Sort alphabetically</Text>
+
+            <View style={styles.rowBetween}>
+              <TouchableOpacity
+                style={[
+                  styles.sortBtn,
+                  sortType === 'AZ' && styles.activeBtn
+                ]}
+                onPress={() => setSortType('AZ')}
+              >
+                <Text>A to Z</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.sortBtn,
+                  sortType === 'ZA' && styles.activeBtn
+                ]}
+                onPress={() => setSortType('ZA')}
+              >
+                <Text>Z to A</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Distance */}
+            <Text style={styles.modalLabel}>Distance to me</Text>
+
+            <View style={styles.rowBetween}>
+              <TouchableOpacity
+                onPress={() => setDistance(d => (d ? Math.max(1, d - 1) : 1))}
+              >
+                <Text style={styles.plusMinus}>-</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.distanceText}>{distance} km</Text>
+
+              <TouchableOpacity
+                onPress={() => setDistance(d => (d ? d + 1 : 1))}
+              >
+                <Text style={styles.plusMinus}>+</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Ratings */}
+            <Text style={styles.modalLabel}>Ratings</Text>
+
+            <View style={styles.ratingRow}>
+              {[1, 2, 3, 4, 5].map(star => (
+                <TouchableOpacity
+                  key={star}
+                  style={[
+                    styles.ratingBtn,
+                    rating === star && styles.activeBtn
+                  ]}
+                  onPress={() => setRating(star)}
+                >
+                  <Text>⭐ {star}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Apply Button */}
+            <TouchableOpacity
+              style={styles.applyBtn}
+              onPress={applyFilters}
+            >
+              <Text style={{ color: '#fff', fontSize: 16 }}>Sort</Text>
+            </TouchableOpacity>
+
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -410,7 +635,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
-    zIndex:100
+    zIndex: 100
   },
   sortMenuItem: {
     paddingHorizontal: wp(3),
@@ -479,5 +704,81 @@ const styles = StyleSheet.create({
     fontSize: scale(12),
     color: colors.text.secondary,
     fontFamily: typography.fontFamily.Regular,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+
+  modalContainer: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+
+  modalLabel: {
+    fontSize: 16,
+    marginTop: 15,
+    marginBottom: 10,
+  },
+
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  sortBtn: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    width: '48%',
+    alignItems: 'center',
+  },
+
+  ratingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  ratingBtn: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+  },
+
+  activeBtn: {
+    backgroundColor: '#E8F5E9',
+    borderColor: '#4CAF50',
+  },
+
+  applyBtn: {
+    backgroundColor: '#A0653C',
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 25,
+  },
+
+  plusMinus: {
+    fontSize: 22,
+    paddingHorizontal: 20,
+  },
+
+  distanceText: {
+    fontSize: 18,
+    fontWeight: '600',
   },
 });

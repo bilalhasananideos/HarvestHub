@@ -1,6 +1,7 @@
 import { Dimensions } from 'react-native';
 
-export const BASEURL = 'https://virtualrealitycreators.com/harvesthub-backend/public/api/v1';
+// export const BASEURL = 'https://virtualrealitycreators.com/harvesthub-backend/public/api/v1';
+export const BASEURL = 'https://harvest-hub.app/harvesthub-backend/public/api/v1';
 
 export const screenHeight = (percent) => {
 	const windowHeight = Dimensions.get('window').height;

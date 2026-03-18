@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -12,13 +12,14 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  Keyboard,
 } from 'react-native';
 import { logo, sms, eye, eyeOff, google, apple } from '../../assets';
 import { scale, typography } from '../../theme/typography';
 import { colors } from '../../theme/colors';
 import { fontSizes, hp, wp } from '../../theme/responsive';
 import auth, { getAuth } from '@react-native-firebase/auth';
-import { loginApi, registerApi } from '../../store/services/Services';
+import { guestLoginApi, loginApi, registerApi } from '../../store/services/Services';
 import { updateUserStates } from '../../store/actions/UserActions';
 import { useDispatch, useSelector } from 'react-redux';
 import { setItem } from '../../utils/localStorage';
@@ -30,11 +31,16 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function SignIn({ navigation }: any) {
   const dispatch = useDispatch();
+
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+  
   const user = useSelector(state => state.userReducer.user);
 
   const [email, setEmail] = useState(__DEV__ ? 'shareef@yopmail.com' : '');
   const [password, setPassword] = useState(__DEV__ ? 'Admin$123' : '');
   const [loading, setLoading] = useState(false);
+  const [guestLoading, setGuestLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{email?: string; password?: string}>({});
 
@@ -47,7 +53,7 @@ export default function SignIn({ navigation }: any) {
       webClientId: 
         '943734294750-tegb8f7s9url0o2ih6iektkbd1a5ul81.apps.googleusercontent.com', // WEB CLIENT ID
       iosClientId:
-        '943734294750-niro5qq2fahijsqeljd7n48fh39ho64v.apps.googleusercontent.com', // iOS CLIENT ID
+        '943734294750-2b0s5seffmei1v7llmnjhjgvp38s1uk2.apps.googleusercontent.com', // iOS CLIENT ID
       offlineAccess: true,
       forceCodeForRefreshToken: true,
       profileImageSize: 120,
@@ -416,11 +422,53 @@ export default function SignIn({ navigation }: any) {
     }
   };
 
+  const guestLogin = async () => {
+    setGuestLoading(true);
+    try {
+      const response = await guestLoginApi()
+      console.log("API Response:", response);
+  
+      if (response?.message === "New guest created") {
+
+        const authObj = {
+          user: response.user,
+          token: response.access_token,
+          device_id: response.device_id,
+        }
+        authObj['defaultRoute'] = 'Home';
+        setItem('key', authObj);
+        console.log("authobject", authObj, {
+          user: response,
+          user2: { ...response },
+          token: response.access_token
+        })
+        dispatch(updateUserStates({
+          isLoggedIn: true,
+          token: response.access_token,
+          device_id: response.device_id,
+          user: {
+              ...user,
+              ...response.user
+          }
+        }));
+
+      } else {
+        Alert.alert("Login failed", response?.message || "Unknown error");
+      }
+    } catch (error) {
+      console.log("err",error)
+    } finally {
+      setGuestLoading(false);
+    }
+  }
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      // keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : -280}
     >
       <ScrollView
         style={styles.scrollView}
@@ -440,6 +488,7 @@ export default function SignIn({ navigation }: any) {
             <View style={[styles.inputContainer, errors.email && styles.inputError]}>
               <Image source={sms} style={styles.inputIcon} />
               <TextInput
+                ref={emailRef}
                 style={styles.input}
                 placeholder="Enter your email"
                 placeholderTextColor={colors.text.hint}
@@ -451,6 +500,9 @@ export default function SignIn({ navigation }: any) {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                returnKeyType='next'
+                blurOnSubmit={false}
+                onSubmitEditing={() => passwordRef.current?.focus()}
               />
             </View>
             {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
@@ -461,6 +513,7 @@ export default function SignIn({ navigation }: any) {
             <View style={[styles.inputContainer, errors.password && styles.inputError]}>
               <Image source={sms} style={styles.inputIcon} />
               <TextInput
+                ref={passwordRef}
                 style={styles.input}
                 placeholder="Enter your password"
                 placeholderTextColor={colors.text.hint}
@@ -471,6 +524,9 @@ export default function SignIn({ navigation }: any) {
                 }}
                 secureTextEntry={!showPassword}
                 autoCorrect={false}
+                returnKeyType='done'
+                blurOnSubmit={false}
+                onSubmitEditing={() => Keyboard.dismiss()}
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -501,6 +557,18 @@ export default function SignIn({ navigation }: any) {
               <ActivityIndicator color={colors.text.inverse} size="small" />
             ) : (
               <Text style={styles.loginButtonText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.loginButton, guestLoading && styles.loginButtonDisabled]}
+            onPress={guestLogin}
+            disabled={guestLoading}
+          >
+            {guestLoading ? (
+              <ActivityIndicator color={colors.text.inverse} size="small" />
+            ) : (
+              <Text style={styles.loginButtonText}>Continue as a Guest</Text>
             )}
           </TouchableOpacity>
 

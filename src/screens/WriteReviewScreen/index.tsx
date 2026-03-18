@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { addFarmReviewApi } from '../../store/services/Services';
+import { colors } from '../../theme/colors';
 
 const WriteReviewScreen = () => {
     const route = useRoute();
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
         marginBottom: 20
     },
     submitBtn: {
-        backgroundColor: "#28a745",
+        backgroundColor: colors.primary.main,
         padding: 15,
         borderRadius: 10,
         alignItems: "center"
