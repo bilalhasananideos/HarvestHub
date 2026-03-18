@@ -2,12 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- <key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/> -->
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.harvesthub</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>HarvestHub</string>
+	<string>The Harvest Hub</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -19,7 +21,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0</string>
+	<string>1.0.2</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -29,14 +31,14 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.943734294750-niro5qq2fahijsqeljd7n48fh39ho64v</string>
+				<string>com.googleusercontent.apps.943734294750-2b0s5seffmei1v7llmnjhjgvp38s1uk2</string>
 			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.0.0</string>
+	<string>1.0.2</string>
 	<key>CLIENT_ID</key>
-	<string>943734294750-niro5qq2fahijsqeljd7n48fh39ho64v.apps.googleusercontent.com</string>
+	<string>943734294750-2b0s5seffmei1v7llmnjhjgvp38s1uk2.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -58,10 +60,10 @@
 	<string>We need permission to save videos to your gallery.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Our app needs access to your photo library to let you upload profile pictures directly from your device.</string>
-	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.943734294750-niro5qq2fahijsqeljd7n48fh39ho64v</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.943734294750-2b0s5seffmei1v7llmnjhjgvp38s1uk2</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>WorkSans-Bold.ttf</string>
@@ -76,10 +78,6 @@
 		<string>fetch</string>
 		<string>processing</string>
 		<string>remote-notification</string>
-	</array>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.harvesthub</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>943734294750-niro5qq2fahijsqeljd7n48fh39ho64v.apps.googleusercontent.com</string>
+	<string>943734294750-2b0s5seffmei1v7llmnjhjgvp38s1uk2.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.943734294750-niro5qq2fahijsqeljd7n48fh39ho64v</string>
+	<string>com.googleusercontent.apps.943734294750-2b0s5seffmei1v7llmnjhjgvp38s1uk2</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>943734294750-cf438oa4ou2jdeaom31fc45hrrb4hbii.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.harvesthub</string>
+	<string>com.codment.harvestHub</string>
 	<key>PROJECT_ID</key>
 	<string>harvest-hub-f93cf</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:943734294750:ios:f614f384e49ced6ec89a4f</string>
+	<string>1:943734294750:ios:e049952956d16ceec89a4f</string>
 </dict>
 </plist>
