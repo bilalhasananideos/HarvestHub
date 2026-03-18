@@ -1,3 +1,4 @@
+import {StripeProvider} from '@stripe/stripe-react-native';
 import React, { useEffect, useState } from 'react';
 import {Image, StyleSheet, Text, View, PermissionsAndroid, Platform} from 'react-native';
 import RootNavigator from './src/navigations/rootNavigator';
@@ -43,6 +44,7 @@ const App = () => {
       const token = await messaging().getToken();
       if (token) {
         console.log('FCM Token:', token);
+        global.fcmToken = token
       } else {
         console.log('No FCM token received');
       }
@@ -99,11 +101,15 @@ const App = () => {
       </View>
   );
   return splashVisible?Splash_Screen:
-  <GestureHandlerRootView>
-    <Provider store={store}> 
-      <RootNavigator />
-    </Provider>
-  </GestureHandlerRootView>;
+  <StripeProvider publishableKey="pk_test_51SczxA7uMQwrI1OyqP3GQHOyQFnNzGxtio4d55ChFQHxzJNGegWvpKX2YgWRlIOVsJ5a8NGIlPQmo8tZopefFg1v00emteYl51">
+
+    <GestureHandlerRootView>
+      <Provider store={store}> 
+        <RootNavigator />
+      </Provider>
+    </GestureHandlerRootView>
+    
+  </StripeProvider>;
 };
 
 export default App;
