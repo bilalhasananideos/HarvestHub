@@ -16,8 +16,25 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getItem } from '../utils/localStorage';
 import { updateUserStates } from '../store/actions/UserActions';
 import WriteReviewScreen from '../screens/WriteReviewScreen';
+import CartScreen from '../screens/CartScreen';
+import AddAddress from '../screens/AddAddress';
 
+import messaging from '@react-native-firebase/messaging';
+import notifee, { AndroidVisibility, EventType } from '@notifee/react-native';
+import ChangePasswordScreen from '../screens/ChangePassword';
+import OrderSuccess from '../screens/OrderSuccess';
 
+const handleRemoteNotificationReceived = async (notification, data) => {
+  await notifee.displayNotification({
+    title: notification.title,
+    body: notification.body,
+    data: data ?? {},
+    android: {
+      channelId: 'default',
+      visibility: AndroidVisibility.PUBLIC,
+    },
+  });
+};
 
 const Stack = createNativeStackNavigator();
 
@@ -49,6 +66,31 @@ export default function RootNavigator() {
       dispatch( updateUserStates(response) );
     }
   }
+
+  // Foreground
+  useEffect(() => {
+    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+      console.log('Foreground Message:', remoteMessage);
+
+      // if (currentScreen.name === 'ChatScreen') return; // avoid popup in chat
+
+      const conversation = remoteMessage?.data;
+      handleRemoteNotificationReceived(remoteMessage.notification, conversation);
+    });
+
+    // Foreground click events
+    const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
+      if (type === EventType.PRESS) {
+        const conversation = detail.notification?.data;
+        // navigationRef.navigate("ChatScreen", { conversation });
+      }
+    });
+
+    return () => {
+      unsubscribeForeground();
+      unsubscribeNotifee();
+    };
+  }, []);
 
   useEffect(() => {
     checkToken()
@@ -82,6 +124,10 @@ export default function RootNavigator() {
         <Stack.Screen  name="MessageScreen" component={MessageScreen} options={headerOptions('Message')} />
         <Stack.Screen  name="VendorProfile" component={VendorProfile} options={headerOptions('Vendor Profile')} />
         <Stack.Screen  name="WriteReviewScreen" component={WriteReviewScreen} options={headerOptions('Write a Review')} />
+        <Stack.Screen  name="AddAddress" component={AddAddress} options={headerOptions('Add Address')} />
+        <Stack.Screen  name="OrderSuccess" component={OrderSuccess} />
+        <Stack.Screen  name="ChangePasswordScreen" component={ChangePasswordScreen} options={headerOptions('Change Password')} />
+        <Stack.Screen  name="Cart" component={CartScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
          )}
     </NavigationContainer>
