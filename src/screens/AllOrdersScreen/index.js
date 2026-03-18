@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { hp, wp, scale, fontSizes } from '../../theme/responsive';
@@ -14,6 +15,7 @@ import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import CacheImage from '../../components/CacheImage';
 import { message, star, location, profile } from '../../assets';
+import { getMyOrdersApi, startChatApi } from '../../store/services/Services';
 
 // Demo data
 const activeOrders = [
@@ -76,10 +78,135 @@ const orderHistory = [
 const AllOrdersScreen = () => {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'history'
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [activeOrders, setActiveOrders] = useState([]);
+  const [orderHistory, setOrderHistory] = useState([]);
 
   const currentOrders = activeTab === 'active' ? activeOrders : orderHistory;
   const totalCount =
     activeTab === 'active' ? activeOrders.length : orderHistory.length;
+
+  useEffect(() => {
+    fetchMyOrders();
+  }, [])
+ 
+
+  const fetchMyOrders = async () => {
+    try {
+      setLoading(true);
+  
+      const [activeRes, historyRes] = await Promise.all([
+        // getMyOrdersApi({
+        //   new: true,
+        //   in_progress: true,
+        //   shipped: false,
+        // }),
+        getMyOrdersApi({
+          new: false,
+          in_progress: false,
+          shipped: false,
+        }),
+        getMyOrdersApi({
+          new: false,
+          in_progress: false,
+          shipped: true,
+        }),
+      ]);
+      // console.log("active", activeRes)
+      // console.log("order history", historyRes)
+        
+      const activeFormatted = formatOrders(activeRes?.orders || []);
+      const historyFormatted = formatOrders(historyRes?.orders || []);
+  
+      setActiveOrders(activeFormatted);
+      setOrderHistory(historyFormatted);
+  
+    } catch (err) {
+      console.log("err", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+  
+      if (activeTab === 'active') {
+        const res = await getMyOrdersApi({
+          new: false,
+          in_progress: false,
+          shipped: false,
+        });
+  
+        const formatted = formatOrders(res?.orders || []);
+        setActiveOrders(formatted);
+  
+      } else {
+        const res = await getMyOrdersApi({
+          new: false,
+          in_progress: false,
+          shipped: true,
+        });
+  
+        const formatted = formatOrders(res?.orders || []);
+        setOrderHistory(formatted);
+      }
+  
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // jab switch karo tab agar api call krni ho to
+  // useEffect(() => {
+  //   onRefresh();
+  // }, [activeTab]);
+
+  const formatOrders = (orders) => {
+    return orders.map((order) => ({
+      id: order.order_number,
+  
+      vendor: {
+        name: order.vendor?.name || "Vendor",
+        image: order.vendor?.image || "",
+        rating: order.vendor?.rating || 0,
+        id: order.vendor?.id || 0,
+      },
+  
+      status: order.status === "shipped" ? "Delivered" : "In process",
+  
+      items: order.items?.map((i) => ({
+        name: i.product?.name || "Product",
+        quantity: `${i.count} ${i.unit || ""}`,
+        price: Number(i.price),
+      })) || [],
+  
+      deliveryDate: order.estimated_delivery_date,
+    }));
+  };
+
+  const _startChat = async (item: any) => {
+    try {
+      setLoading(true);
+      
+      const data = await startChatApi({other_user_id: item?.vendor?.id})
+      console.log("data", data)
+
+      navigation.navigate("MessageScreen", {
+        vendor_id: item?.vendor?.id,
+        uuid: data?.conversation?.uuid
+      })
+
+    } catch (err) {
+      console.log("err", err)
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const renderOrderCard = ({ item }) => {
     const totalPrice = item.items.reduce(
@@ -94,10 +221,12 @@ const AllOrdersScreen = () => {
           <View style={styles.vendorInfo}>
             <CacheImage url={item.vendor.image} style={styles.vendorAvatar} />
             <View style={styles.vendorDetails}>
-              <Text style={styles.vendorName}>{item.vendor.name}</Text>
-              <View style={styles.ratingRow}>
-                <Image source={star} style={styles.starIcon} />
-                <Text style={styles.ratingText}>{item.vendor.rating}</Text>
+              <View style={styles.vendorDetailInner}>
+                <Text numberOfLines={1} style={styles.vendorName}>{item.vendor.name}</Text>
+                <View style={styles.ratingRow}>
+                  <Image source={star} style={styles.starIcon} />
+                  <Text style={styles.ratingText}>{item.vendor.rating}</Text>
+                </View>
               </View>
               <Text style={styles.orderId}>Order ID: #{item.id}</Text>
             </View>
@@ -155,7 +284,8 @@ const AllOrdersScreen = () => {
               style={styles.chatButton}
               onPress={() => {
                 // Navigate to chat with vendor
-                console.log('Chat with vendor');
+                // console.log('Chat with vendor');
+                _startChat(item)
               }}
             >
               <Image source={message} style={styles.buttonIcon} />
@@ -167,7 +297,10 @@ const AllOrdersScreen = () => {
                 style={styles.viewProfileButton}
                 onPress={() => {
                   // Navigate to vendor profile
-                  console.log('View vendor profile');
+                  // console.log('View vendor profile');
+                  navigation.navigate("VendorProfile", {
+                    vendorProfileId: item?.vendor?.id
+                  })
                 }}
               >
                 <Image
@@ -179,7 +312,7 @@ const AllOrdersScreen = () => {
                   View vendor profile
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={styles.reorderButton}
                 onPress={() => {
                   // Re-order functionality
@@ -187,7 +320,7 @@ const AllOrdersScreen = () => {
                 }}
               >
                 <Text style={styles.reorderButtonText}>Re-order</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </>
           )}
         </View>
@@ -197,6 +330,11 @@ const AllOrdersScreen = () => {
 
   return (
     <View style={styles.container}>
+      {loading && (
+        <View style={styles.loaderOverlay}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+        </View>
+      )}
       {/* Tabs */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
@@ -238,10 +376,13 @@ const AllOrdersScreen = () => {
       {/* Orders List */}
       <FlatList
         data={currentOrders}
+        // data={[]}
         renderItem={renderOrderCard}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No orders found</Text>
@@ -259,10 +400,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.default,
   },
+  loaderOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // semi-transparent
+    zIndex: 999,
+  },
   tabContainer: {
     flexDirection: 'row',
     paddingHorizontal: wp(4),
-    paddingTop: hp(1),
+    paddingTop: hp(2),
     paddingBottom: hp(1.5),
     backgroundColor: colors.background.default,
   },
@@ -304,7 +456,7 @@ const styles = StyleSheet.create({
   },
   orderCard: {
     backgroundColor: colors.background.white,
-    borderRadius: wp(3),
+    borderRadius: wp(5),
     padding: wp(4),
     marginBottom: hp(2),
     shadowColor: colors.overlay.light,
@@ -332,7 +484,12 @@ const styles = StyleSheet.create({
     marginRight: wp(3),
   },
   vendorDetails: {
-    flex: 1,
+    // flex: 1,
+    flex: 0.75,
+  },
+  vendorDetailInner: {
+    flexDirection: 'row',
+    alignItems: 'center'
   },
   vendorName: {
     fontSize: fontSizes.fs16,
@@ -344,6 +501,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: hp(0.3),
+    marginLeft: wp(1),
   },
   starIcon: {
     width: wp(3.5),
@@ -359,7 +517,8 @@ const styles = StyleSheet.create({
   orderId: {
     fontSize: fontSizes.fs11,
     fontFamily: typography.fontFamily.Regular,
-    color: colors.text.secondary,
+    color: colors.text.primary,
+    marginTop: hp(0.3),
   },
   statusBadge: {
     paddingHorizontal: wp(3),
