@@ -21,6 +21,8 @@ import { typography } from '../../theme/typography';
 import CacheImage from '../../components/CacheImage';
 import { arrowleft, star, truck, plus, sub } from '../../assets';
 import { addtoCartApi, deleteCartApi, getCartApi } from '../../store/services/Services';
+import Toast from 'react-native-toast-message';
+
 
 // ui needs
 // product = {
@@ -107,20 +109,56 @@ const ProductDetailScreen = ({ route }: any) => {
   const openImageModal = () => setImageModalVisible(true);
   const closeImageModal = () => setImageModalVisible(false);
 
+  // // const handleAddToCart = async () => {
+  // //   try {
+  // //     setLoading(true);
+
+  // //     const response = await addtoCartApi({
+  // //       vendor_product_id: item?.id,
+  // //       quantity,
+  // //     })
+  // //     console.log("response", response);
+  // //     if (response.message == "Added to cart") {
+  // //       navigation.navigate('Cart');
+  // //     }
+  // //   } catch (err) {
+  // //     console.log("err", err)
+  // //   } finally {
+  // //     setLoading(false);
+  // //   }
+  // // };
   // const handleAddToCart = async () => {
   //   try {
   //     setLoading(true);
-
-  //     const response = await addtoCartApi({
-  //       vendor_product_id: item?.id,
-  //       quantity,
-  //     })
-  //     console.log("response", response);
-  //     if (response.message == "Added to cart") {
-  //       navigation.navigate('Cart');
+  
+  //     const cart = await getCartApi();
+  //     const items = cart.items || [];
+  
+  //     if (items.length > 0 && items[0].vendor_product.vendor_id !== product.vendor_id) {
+  //       Alert.alert(
+  //         "Replace Cart Items?",
+  //         "Your cart has items from another vendor. Do you want to remove them and add this item?",
+  //         [
+  //           { text: "Cancel", style: "cancel" },
+  //           { 
+  //             text: "Yes", 
+  //             onPress: async () => {
+  //               await Promise.all(items.map(i => deleteCartApi(i.id)));
+  //               await addtoCartApi({ vendor_product_id: product.id, quantity });
+  //               navigation.navigate("Cart");
+  //             } 
+  //           }
+  //         ]
+  //       );
+  //       return;
   //     }
+  
+  //     // Same vendor → add normally
+  //     await addtoCartApi({ vendor_product_id: product.id, quantity });
+  //     navigation.navigate("Cart");
+  
   //   } catch (err) {
-  //     console.log("err", err)
+  //     console.log("Add to cart error:", err);
   //   } finally {
   //     setLoading(false);
   //   }
@@ -143,6 +181,13 @@ const ProductDetailScreen = ({ route }: any) => {
               onPress: async () => {
                 await Promise.all(items.map(i => deleteCartApi(i.id)));
                 await addtoCartApi({ vendor_product_id: product.id, quantity });
+  
+                Toast.show({
+                  type: 'success',
+                  text1: 'Added to Cart',
+                  text2: 'Your item has been added successfully',
+                });
+  
                 navigation.navigate("Cart");
               } 
             }
@@ -151,8 +196,15 @@ const ProductDetailScreen = ({ route }: any) => {
         return;
       }
   
-      // Same vendor → add normally
+      // Same vendor
       await addtoCartApi({ vendor_product_id: product.id, quantity });
+  
+      Toast.show({
+        type: 'success',
+        text1: 'Added to Cart',
+        text2: 'Your item has been added successfully',
+      });
+  
       navigation.navigate("Cart");
   
     } catch (err) {

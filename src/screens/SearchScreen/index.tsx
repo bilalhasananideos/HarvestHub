@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Modal,
 } from 'react-native';
-import { hp, wp } from '../../theme/responsive';
+import { fontSizes, hp, wp } from '../../theme/responsive';
 import { colors } from '../../theme/colors';
 import { scale } from '../../theme/responsive';
 import { typography } from '../../theme/typography';
@@ -366,7 +366,7 @@ const SearchScreen = ({ navigation }: any) => {
           <View style={styles.searchBar}>
             <TextInput
               placeholder="Search farms OR browse categories"
-              placeholderTextColor={colors.text.primary}
+              placeholderTextColor={colors.text.secondary}
               style={styles.searchInput}
               value={query}
               onChangeText={setQuery}
@@ -577,8 +577,11 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    color: colors.primary.secondary,
+    color: colors.text.primary,
     fontSize: scale(15),
+    fontFamily: typography.fontFamily.Regular,
+    fontSize: fontSizes.fs15,
+    paddingLeft: wp(2),
     fontFamily: typography.fontFamily.Regular,
   },
   filterBtn: {

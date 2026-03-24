@@ -365,16 +365,7 @@ const VendorProfile = ({ route }: any) => {
       });
       console.log('res', resp)
   
-      const mapped = resp?.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        description: item.description,
-        availableQty: item.available_qty
-      })) || [];
-  
-      setProducts(mapped);
+      setProducts(resp?.products);
   
     } catch (error) {
       console.log('Product search error', error);
@@ -478,7 +469,11 @@ const VendorProfile = ({ route }: any) => {
         <CacheImage url={item.images?.[0]?.image} style={styles.productImage} />
         <TouchableOpacity 
           style={styles.addButton}
-          onPress={() => handleAddToCart(item)}
+          activeOpacity={1}
+          // onPress={() => handleAddToCart(item)}
+          onPress={() => navigation.navigate('ProductDetailScreen', {
+            item
+          })}
         >
           <Image source={plus} style={styles.addButtonIcon} />
          </TouchableOpacity>
@@ -606,9 +601,9 @@ const VendorProfile = ({ route }: any) => {
               <Image source={location} style={styles.locationIcon} />
               <Text style={styles.addressText}>{vendorInfo.address}</Text>
             </View>
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
               <Text style={styles.viewMapText}>View on map</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
 
@@ -654,17 +649,23 @@ const VendorProfile = ({ route }: any) => {
         {/* Content based on active tab */}
         {activeTab === 'Products' && (
           <View style={styles.productsSection}>
-            <Text style={styles.sectionTitle}>Just for you</Text>
-            <FlatList
-              // data={products}
-              data={products1}
-              renderItem={renderProduct}
-              keyExtractor={item => item.id}
-              numColumns={2}
-              scrollEnabled={false}
-              columnWrapperStyle={styles.productRow}
-              contentContainerStyle={styles.productsList}
-            />
+            {products1.length === 0 ? (
+              <Text style={styles.emptyMessage}>No products available</Text>
+            ) : (
+              <>
+                <Text style={styles.sectionTitle}>Just for you</Text>
+                <FlatList
+                  // data={products}
+                  data={products1}
+                  renderItem={renderProduct}
+                  keyExtractor={item => item.id}
+                  numColumns={2}
+                  scrollEnabled={false}
+                  columnWrapperStyle={styles.productRow}
+                  contentContainerStyle={styles.productsList}
+                />
+              </>
+            )}
           </View>
         )}
 
@@ -732,7 +733,7 @@ const VendorProfile = ({ route }: any) => {
             <View style={styles.reviewsList}>
               {/* {reviews.map(review => ( */}
               {reviews1.length === 0 ? (
-                <Text>No reviews yet</Text>
+                <Text style={styles.emptyMessage}>No reviews yet</Text>
               ) : (
                 reviews1.map(review => (
                   <View key={review.id} style={styles.reviewItem}>
@@ -1139,6 +1140,12 @@ const styles = StyleSheet.create({
   productRow: {
     justifyContent: 'space-between',
     marginBottom: hp(2),
+  },
+  emptyMessage: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    color: '#888',
   },
   productCard: {
     width: wp(43),

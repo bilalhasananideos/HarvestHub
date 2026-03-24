@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import messaging from '@react-native-firebase/messaging';
 import { Provider } from 'react-redux';
 import { store } from './src/store';
+import Toast from 'react-native-toast-message';
 
 const App = () => {
     const [splashVisible,setSplashVisible]=useState(true);
@@ -107,6 +108,7 @@ const App = () => {
       <Provider store={store}> 
         <RootNavigator />
       </Provider>
+      <Toast />
     </GestureHandlerRootView>
     
   </StripeProvider>;

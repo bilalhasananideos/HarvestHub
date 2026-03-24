@@ -66,7 +66,7 @@ export const visitFarmApi = (data: any) => post(`/user/farm-visit/request`, JSON
 export const addFarmReviewApi = (data: any) => post(`/user/vendor/review`, JSON.stringify(data));
 
 export const searchVendorProductsApi = (vendorId: string, params = {}) =>
-  get(`/vendor/${vendorId}/products`, params);
+  get(`/user/vendor/${vendorId}/products`, params);
 
 
 // cart apis
