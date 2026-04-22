@@ -188,7 +188,9 @@ const ProductDetailScreen = ({ route }: any) => {
                   text2: 'Your item has been added successfully',
                 });
   
-                navigation.navigate("Cart");
+                navigation.navigate("MybottomTabs", {
+                  screen: "Cart",
+                });
               } 
             }
           ]
@@ -205,7 +207,9 @@ const ProductDetailScreen = ({ route }: any) => {
         text2: 'Your item has been added successfully',
       });
   
-      navigation.navigate("Cart");
+      navigation.navigate("MybottomTabs", {
+        screen: "Cart",
+      });
   
     } catch (err) {
       console.log("Add to cart error:", err);
@@ -489,7 +493,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   infoText: {
-    fontSize: scale(12),
+    fontSize: scale(14),
     color: '#444',
     fontFamily: typography.fontFamily.Medium,
   },

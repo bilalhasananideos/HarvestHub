@@ -559,7 +559,7 @@ import CacheImage from '../../components/CacheImage';
 import { camera } from '../../assets';
 import Toast from 'react-native-toast-message';
 
-const Profile = () => {
+const Profile = (props:any) => {
   const dispatch = useDispatch();
   const phoneRef = useRef(null);
   
@@ -686,6 +686,7 @@ const Profile = () => {
           text1: 'Success',
           text2: 'Profile updated successfully',
         });
+        props.navigation.goBack()
       } else {
         Toast.show({
           type: 'error',

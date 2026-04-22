@@ -788,6 +788,7 @@ const ChatScreen = ({ navigation, route }) => {
             placeholder="Type message..."
             value={inputText}
             onChangeText={setInputText}
+            autoCorrect={false}
           />
 
           <TouchableOpacity

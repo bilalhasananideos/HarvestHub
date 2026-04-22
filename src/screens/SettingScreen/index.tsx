@@ -7,8 +7,9 @@ import {
   Image,
   Alert,
   Linking,
+  ActivityIndicator,
 } from 'react-native';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { scale, typography } from '../../theme/typography';
 import {
@@ -33,12 +34,13 @@ import { getItem, removeItem, setItem } from '../../utils/localStorage';
 import { resetUserState, updateUserStates } from '../../store/actions/UserActions';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import { useFocusEffect } from '@react-navigation/native';
-import { getProfileApi } from '../../store/services/Services';
+import { deleteAccountApi, getProfileApi, logoutApi } from '../../store/services/Services';
 
 const SettingScreen = ({ navigation }: any) => {
   const bottomTabNavigation = useNavigation<any>();
   const dispatch = useDispatch();
   const user = useSelector(state => state.userReducer.user);
+  const [loading, setLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -127,6 +129,38 @@ const SettingScreen = ({ navigation }: any) => {
   //     ]
   //   );
   // };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setLoading(true);
+  
+      const response = await deleteAccountApi();
+      console.log("res", response)
+  
+      if (response?.success) {
+        // Alert.alert('Success', 'Your account has been deleted');
+  
+        // Clear storage + redux
+        await removeItem('key');
+        dispatch(resetUserState());
+  
+        // Navigate
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'WelcomeScreen' }],
+        });
+      } else {
+        Alert.alert('Error', response?.message || 'Failed to delete account');
+      }
+  
+    } catch (error) {
+      console.log('Delete account error:', error);
+      Alert.alert('Error', 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const deleteAccount = () => {
     Alert.alert(
       'Confirm Delete Account',
@@ -136,23 +170,24 @@ const SettingScreen = ({ navigation }: any) => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              // Call the delete account API
-              // const result = await deleteAccountAPI();
-              // if (result.success) {
-                Alert.alert('Success', 'Your account has been deleted');
-                // Navigate to the welcome screen or login screen
-                navigation.navigate('WelcomeScreen');
-              // } 
-              // else {
-              //   Alert.alert('Error', result.error || 'Failed to delete account');
-              // }
-            } catch (error) {
-              console.error('Error deleting account:', error);
-              Alert.alert('Error', 'An unexpected error occurred');
-            }
-          },
+          // onPress: async () => {
+          //   try {
+          //     // Call the delete account API
+          //     // const result = await deleteAccountAPI();
+          //     // if (result.success) {
+          //       Alert.alert('Success', 'Your account has been deleted');
+          //       // Navigate to the welcome screen or login screen
+          //       navigation.navigate('WelcomeScreen');
+          //     // } 
+          //     // else {
+          //     //   Alert.alert('Error', result.error || 'Failed to delete account');
+          //     // }
+          //   } catch (error) {
+          //     console.error('Error deleting account:', error);
+          //     Alert.alert('Error', 'An unexpected error occurred');
+          //   }
+          // },
+          onPress: handleDeleteAccount,
         },
       ]
     );
@@ -164,25 +199,63 @@ const SettingScreen = ({ navigation }: any) => {
     console.log('logOutWithGoogle');
   };
 
+  // const logout = async () => {
+  //   // // if ( global.login === 'google' ) {
+  //   // await logOutWithGoogle()
+  //   // // }
+  //   await removeItem('key')
+  //   dispatch(resetUserState());
+  //   removeItem('key');
+  //   await logOutWithGoogle();
+  //   // navigation.replace("Login");
+  // }
+
   const logout = async () => {
-    // // if ( global.login === 'google' ) {
-    // await logOutWithGoogle()
-    // // }
-    await removeItem('key')
-    dispatch(resetUserState());
-    removeItem('key');
-    await logOutWithGoogle();
-    // navigation.replace("Login");
-  }
+    try {
+      setLoading(true);
+  
+      // Call logout API (optional if backend requires)
+      const data = await logoutApi({fcm_token: global.fcmToken});
+      console.log("dat", data)
+
+      // Google logout (if used)
+      await GoogleSignin.revokeAccess();
+      await GoogleSignin.signOut();
+  
+      // Clear local storage
+      await removeItem('key');
+  
+      // Reset redux
+      dispatch(resetUserState());
+  
+      // Navigate to login
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+  
+    } catch (error) {
+      console.log('Logout error:', error);
+      Alert.alert('Error', 'Logout failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.contentContainer}
     >
+      {loading && (
+              <View style={styles.loaderOverlay}>
+                <ActivityIndicator size="large" color="#4CAF50" />
+              </View>
+            )}
       {/* Profile Section */}
       <View style={styles.profileContainer}>
-        <CacheImage url={user.image != null ? user.image : 'https://randomuser.me/api/portraits/men/1.jpg'} style={styles.profileImage} />
+        <CacheImage url={user.image != null ? user.image : require('../../assets/images/profilefill.png')} style={styles.profileImage} />
         <View style={{marginLeft:scale(1),flex:1}}>
           <Text style={[styles.itemTitle,{fontSize:fontSizes.fs22}]}>{capitalize(user.name)}</Text>
           <Text style={styles.itemEmail}>{user.email}</Text>
@@ -218,7 +291,7 @@ const SettingScreen = ({ navigation }: any) => {
       <Text style={styles.sectionTitle}>Preferences</Text>
       <Pressable
         style={styles.item}
-        onPress={() => bottomTabNavigation.navigate('Alerts')}
+        onPress={() => navigation.navigate('NotificationScreen')}
       >
         <View style={styles.imageContainer}>
           <Image source={notification} style={styles.itemIcon} />
@@ -226,6 +299,18 @@ const SettingScreen = ({ navigation }: any) => {
         <View>
           <Text style={styles.itemTitle}>Notifications</Text>
           <Text style={styles.itemDesc}>Manage your notification settings</Text>
+        </View>
+      </Pressable>
+      <Pressable
+        style={styles.item}
+        onPress={() => navigation.navigate('AddressListScreen')}
+      >
+        <View style={styles.imageContainer}>
+          <Image source={tos} style={styles.itemIcon} />
+        </View>
+        <View>
+          <Text style={styles.itemTitle}>Address</Text>
+          <Text style={styles.itemDesc}>Manage your addresses</Text>
         </View>
       </Pressable>
       <View style={styles.divider} />
@@ -343,6 +428,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff96',
+  },
+  loaderOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // semi-transparent
+    zIndex: 999,
   },
   contentContainer: {
     padding: 15,

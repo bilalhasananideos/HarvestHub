@@ -1,4 +1,4 @@
-import { deleting, get, post } from './Http';
+import { deleting, get, post, put } from './Http';
 
 export const loginApi = (data: any) => post(`/login`, JSON.stringify(data));
 // export const loginApi = (data: any) => post(`/login2`, JSON.stringify(data));
@@ -89,6 +89,13 @@ export const messageSendApi = (uuid: string, text: string) => post(`/conversatio
   text: text
 }));
 export const messageReadApi = (uuid: string) => post(`/conversations/${uuid}/mark-read`);
+export const getNotificationsApi = () => get(`/user/notifications`); 
+export const deleteAccountApi = () => deleting(`/delete-account`);
+
+export const getAddressApi = () => get('/user/addresses');
+export const addAddressApi = (data: any) => post(`/user/addresses`, JSON.stringify(data));
+// export const updateAddressApi = (data: any) => put(`/user/addresses`, JSON.stringify(data));
+export const updateAddressApi = (id: any, data: any) => put(`/user/addresses/${id}`, JSON.stringify(data));
 
 export const getInfoApi = () => get(`/info`);
 export const getFranchiseApi = () => get(`/franchises`);
@@ -98,7 +105,7 @@ export const setDeviceApi = (data: any) => post(`/user/device`, JSON.stringify(d
 
 export const userUpdateApi = (data: any) => post(`/user/update`, data, {}, true);
 export const getMyProfileApi = () => get(`/me`);
-export const deleteAccountApi = (data: any) => deleting(`/me`, JSON.stringify(data));
+// export const deleteAccountApi = (data: any) => deleting(`/me`, JSON.stringify(data));
 
 export const getUserApi = (id: string) => get(`/user/${id}`);
 export const getUsersApi = (data: any) => get(`/users`, data);
@@ -149,7 +156,7 @@ export const hireApplierApi = (payload: any) => post(`/job/hired`, JSON.stringif
 export const createReviewApi = (data: any) => post(`/reviews`, JSON.stringify(data));
 export const getReviewApi = (id: string, params = {}) => get(`/reviews/${id}`, params);
 
-export const getNotificationsApi = () => get(`/notifications`);
+// export const getNotificationsApi = () => get(`/notifications`);
 export const getContentApi = (type: string) => get(`/content/${type}`);
 
 export const messageApi = (id: string) => get(`/messages/${id}`);

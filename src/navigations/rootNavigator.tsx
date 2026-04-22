@@ -23,6 +23,12 @@ import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidVisibility, EventType } from '@notifee/react-native';
 import ChangePasswordScreen from '../screens/ChangePassword';
 import OrderSuccess from '../screens/OrderSuccess';
+import NotificationScreen from '../screens/Notification';
+import AddressListScreen from '../screens/AddressListScreen';
+import AddAddressScreen from '../screens/AddressListScreen/AddAddressScreen';
+import EditAddressScreen from '../screens/AddressListScreen/EditAddressScreen';
+
+// import LocationScreen from '../screens/LocationScreen';
 
 const handleRemoteNotificationReceived = async (notification, data) => {
   await notifee.displayNotification({
@@ -124,9 +130,14 @@ export default function RootNavigator() {
         <Stack.Screen  name="MessageScreen" component={MessageScreen} options={headerOptions('Message')} />
         <Stack.Screen  name="VendorProfile" component={VendorProfile} options={headerOptions('Vendor Profile')} />
         <Stack.Screen  name="WriteReviewScreen" component={WriteReviewScreen} options={headerOptions('Write a Review')} />
-        <Stack.Screen  name="AddAddress" component={AddAddress} options={headerOptions('Add Address')} />
+        <Stack.Screen  name="AddAddress" component={AddAddress} options={headerOptions('Checkout')} />
         <Stack.Screen  name="OrderSuccess" component={OrderSuccess} />
         <Stack.Screen  name="ChangePasswordScreen" component={ChangePasswordScreen} options={headerOptions('Change Password')} />
+        <Stack.Screen  name="NotificationScreen" component={NotificationScreen} options={headerOptions('Notifications')} />
+        <Stack.Screen  name="AddressListScreen" component={AddressListScreen} options={headerOptions('My Addresses')} />
+        <Stack.Screen  name="AddAddressScreen" component={AddAddressScreen} options={headerOptions('Add Addresses')} />
+        <Stack.Screen  name="EditAddressScreen" component={EditAddressScreen} options={headerOptions('Edit Addresses')} />
+        {/* <Stack.Screen  name="LocationScreen" component={LocationScreen} /> */}
         <Stack.Screen  name="Cart" component={CartScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
          )}

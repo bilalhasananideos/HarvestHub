@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -95,6 +95,15 @@ const demoFarmers: Farmer[] = [
 
 type SortOption = 'rating_desc' | 'distance_asc' | 'name_asc';
 
+// const MOST_SEARCHES = [
+//   'Fruits', 'Vegetables', 'Milk', 'Cheese', 'Eggs',
+//   'Spices', 'Honey', 'Strawberry', 'Watermelon', 'Yogurt',
+//   'Organic', 'Fresh Herbs',
+// ];
+const MOST_SEARCHES = [
+  'Fruits', 'Vegetables', 'Milk', 'Cheese', 'Honey', 'Strawberry', 'Watermelon',
+];
+
 const SearchScreen = ({ navigation }: any) => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.userReducer.user);
@@ -109,6 +118,17 @@ const SearchScreen = ({ navigation }: any) => {
   const [distance, setDistance] = useState<number | null>(null);
   const [rating, setRating] = useState<number | null>(null);
   // const [filtered1, setFiltered1] = useState(filtered)
+
+  const [activeChip, setActiveChip] = useState<string | null>(null);
+  const skipDebounce = useRef(false);
+
+  // ─── 3. Chip press handler ─────────────────────────────────────
+  const handleChipPress = (chip: string) => {
+    skipDebounce.current = true;   // ← USE
+    setActiveChip(chip);
+    setQuery(chip);          // search input mein bhi set ho jayega
+    fetchVendors(chip);      // directly API call
+  };
 
   // useEffect(() => {
   //   getExploreData();
@@ -236,13 +256,17 @@ const SearchScreen = ({ navigation }: any) => {
   // }, [query, rating, distance, sortType]);
 
   // 🔥 API CALL FUNCTION
-  const fetchVendors = async () => {
+  const fetchVendors = async (overrideQuery?: string) => {
     try {
       setLoading(true);
 
       const params: any = {};
 
-      if (query.trim()) params.search = query;
+      // if (query.trim()) params.search = query;
+      // ✅ state query ki jagah overrideQuery use karo agar mila
+      const searchTerm = overrideQuery !== undefined ? overrideQuery : query;
+      if (searchTerm.trim()) params.search = searchTerm;
+
       if (rating) params.rating = rating;
       if (distance) params.mile = distance;
 
@@ -281,6 +305,10 @@ const SearchScreen = ({ navigation }: any) => {
 
   // debounce function
   useEffect(() => {
+    if (skipDebounce.current) {
+      skipDebounce.current = false;  // ← USE (reset)
+      return;                         // ← skip API call
+    } 
     const delay = setTimeout(() => {
       if (query.trim()) {
         fetchVendors();
@@ -381,6 +409,34 @@ const SearchScreen = ({ navigation }: any) => {
           </View>
         </View>
       </View>
+
+            {/* Most Searches — sirf tab dikho jab query empty ho */}
+{/* {!query.trim() && farmers.length === 0 && ( */}
+{/* {!query.trim() && ( */}
+  <View style={styles.section}>
+    <Text style={styles.heading}>Most Searches</Text>
+    <View style={styles.chipWrap}>
+      {MOST_SEARCHES.map(chip => (
+        <TouchableOpacity
+          key={chip}
+          onPress={() => handleChipPress(chip)}
+          style={[
+            styles.chip,
+            activeChip === chip && styles.chipActive,
+          ]}
+        >
+          <Text style={[
+            styles.chipText,
+            activeChip === chip && styles.chipTextActive,
+          ]}>
+            {chip}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  </View>
+{/* )} */}
+
 
       {/* Title + sort */}
       <View style={styles.sectionHeader}>
@@ -784,4 +840,42 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
+
+  section: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 8,
+  },
+  heading: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 10,
+  },
+  chipWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  chip: {
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    borderRadius: 50,
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  chipActive: {
+    backgroundColor: '#dcebd4',
+    borderColor: '#4a7c3f',
+  },
+  chipText: {
+    fontSize: 12,
+    color: '#555',
+  },
+  chipTextActive: {
+    color: '#3d6b2a',
+    fontWeight: '600',
+  },
+
 });

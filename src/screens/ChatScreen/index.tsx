@@ -273,7 +273,276 @@ const chatData: ChatItem[] = [
 // });
 
 
-import React, { useEffect, useLayoutEffect, useState, useCallback } from "react";
+// import React, { useEffect, useLayoutEffect, useState, useCallback } from "react";
+// import {
+//   View,
+//   Text,
+//   FlatList,
+//   TouchableOpacity,
+//   Image,
+//   ActivityIndicator,
+//   RefreshControl,
+// } from "react-native";
+// import { useNavigation, NavigationProp } from "@react-navigation/native";
+// import Swipeable from "react-native-gesture-handler/Swipeable";
+// import moment from "moment";
+// import { getChatListApi } from "../../store/services/Services";
+// import Ionicons from 'react-native-vector-icons/Ionicons';
+
+// const ChatScreen = () => {
+
+//   const navigation = useNavigation<NavigationProp<any>>();
+
+//   const [data, setData] = useState<any[]>([]);
+//   const [loading, setLoading] = useState(false);
+//   const [refreshing, setRefreshing] = useState(false);
+
+//   useLayoutEffect(() => {
+//     navigation.setOptions({
+//       headerTitle: "Chat Box",
+//       headerTitleAlign: "center",
+//     });
+//   }, [navigation]);
+
+//   useEffect(() => {
+//     getChatListData();
+//   }, []);
+
+//   const getChatListData = async () => {
+//     try {
+//       setLoading(true);
+
+//       const resp = await getChatListApi();
+//       console.log("resp", resp)
+
+//       const conversations = resp?.data?.data?.conversations || [];
+
+//       const formatted = conversations.map((item: any) => ({
+//         id: item.uuid,
+//         name: item.other_user?.name,
+//         avatar: item.other_user?.image,
+//         message: item.last_message,
+//         time: moment(item.last_message_at).format("hh:mm A"),
+//         unread: item.unread_count,
+//       }));
+
+//       setData(formatted);
+
+//     } catch (err) {
+//       console.log("Chat list error", err);
+//     } finally {
+//       setLoading(false);
+//       setRefreshing(false);
+//     }
+//   };
+
+//   const onRefresh = () => {
+//     setRefreshing(true);
+//     getChatListData();
+//   };
+
+//   const handleDelete = (id: string) => {
+//     const filtered = data.filter(item => item.id !== id);
+//     setData(filtered);
+//   };
+
+//   const renderRightActions = (id: string) => (
+//     <TouchableOpacity
+//       style={styles.deleteAction}
+//       onPress={() => handleDelete(id)}>
+//       <Text style={{ color: "white" }}>Delete</Text>
+//     </TouchableOpacity>
+//   );
+
+//   const renderItem = ({ item }: any) => (
+//     <Swipeable renderRightActions={() => renderRightActions(item.id)}>
+//       <TouchableOpacity
+//         style={styles.row}
+//         activeOpacity={0.8}
+//         onPress={() => navigation.navigate("MessageScreen", { item })}
+//       >
+//         <Image source={{ uri: item.avatar }} style={styles.avatar} />
+
+//         <View style={styles.messageWrapper}>
+//           <Text style={styles.nameText}>{item.name}</Text>
+//           <Text style={styles.messageText} numberOfLines={1}>
+//             {item.message}
+//           </Text>
+//         </View>
+
+//         <View style={{ alignItems: "flex-end" }}>
+//           <Text style={styles.timeText}>{item.time}</Text>
+
+//           {item.unread > 0 && (
+//             <View style={styles.badge}>
+//               <Text style={styles.badgeText}>{item.unread}</Text>
+//             </View>
+//           )}
+//         </View>
+
+//       </TouchableOpacity>
+//     </Swipeable>
+//   );
+
+//   if (loading) {
+//     return (
+//       <View style={styles.loader}>
+//         <ActivityIndicator size="large" />
+//       </View>
+//     );
+//   }
+
+//   const ChatEmpty = () => (
+//     <View style={styles.wrap}>
+//       <View style={styles.iconCircle}>
+//         <Ionicons name="chatbubble-ellipses-outline" size={42} color="#7a9e6e" />
+//       </View>
+//       <Text style={styles.title}>No Conversations Yet</Text>
+//       <Text style={styles.subtitle}>
+//         Start a conversation with a farmer{'\n'}to get fresh updates directly.
+//       </Text>
+//     </View>
+//   );
+  
+
+//   return (
+//     <View style={styles.safeArea}>
+
+//       <FlatList
+//         data={data}
+//         keyExtractor={item => item.id}
+//         renderItem={renderItem}
+//         refreshControl={
+//           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+//         }
+//         ItemSeparatorComponent={() => <View style={styles.separator} />}
+//         // ListEmptyComponent={
+//         //   <View style={styles.empty}>
+//         //     <Text>No Conversations</Text>
+//         //   </View>
+//         // }
+//         ListEmptyComponent={<ChatEmpty />}
+//       />
+
+//     </View>
+//   );
+// };
+
+// export default ChatScreen;
+
+// const styles = {
+
+//   safeArea: {
+//     flex: 1,
+//     backgroundColor: "#fff"
+//   },
+
+//   row: {
+//     flexDirection: "row",
+//     padding: 15,
+//     alignItems: "center"
+//   },
+
+//   avatar: {
+//     width: 50,
+//     height: 50,
+//     borderRadius: 25,
+//     marginRight: 12
+//   },
+
+//   messageWrapper: {
+//     flex: 1
+//   },
+
+//   nameText: {
+//     fontSize: 16,
+//     fontWeight: "600"
+//   },
+
+//   messageText: {
+//     color: "#777",
+//     marginTop: 4
+//   },
+
+//   timeText: {
+//     fontSize: 12,
+//     color: "#999"
+//   },
+
+//   badge: {
+//     backgroundColor: "#25D366",
+//     borderRadius: 12,
+//     paddingHorizontal: 6,
+//     paddingVertical: 2,
+//     marginTop: 5
+//   },
+
+//   badgeText: {
+//     color: "#fff",
+//     fontSize: 12
+//   },
+
+//   separator: {
+//     height: 1,
+//     backgroundColor: "#eee",
+//     marginLeft: 75
+//   },
+
+//   deleteAction: {
+//     backgroundColor: "red",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     width: 80
+//   },
+
+//   loader: {
+//     flex: 1,
+//     justifyContent: "center",
+//     alignItems: "center"
+//   },
+
+//   empty: {
+//     marginTop: 100,
+//     alignItems: "center"
+//   },
+
+//   wrap: {
+//     flex: 1,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     paddingTop: 100,
+//     paddingHorizontal: 40,
+//   },
+//   iconCircle: {
+//     width: 90,
+//     height: 90,
+//     borderRadius: 45,
+//     backgroundColor: '#eaf3e0',   // light green
+//     borderWidth: 1.5,
+//     borderColor: '#c5ddb4',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     marginBottom: 20,
+//   },
+//   title: {
+//     fontSize: 18,
+//     fontWeight: '600',
+//     color: '#2c2c2c',
+//     marginBottom: 8,
+//     textAlign: 'center',
+//   },
+//   subtitle: {
+//     fontSize: 14,
+//     color: '#aaa',
+//     textAlign: 'center',
+//     lineHeight: 22,
+//   },
+
+// };
+
+
+
+import React, { useLayoutEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -282,18 +551,32 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
+  StyleSheet,
 } from "react-native";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { useNavigation, NavigationProp, useFocusEffect } from "@react-navigation/native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import moment from "moment";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { getChatListApi } from "../../store/services/Services";
 
-const ChatScreen = () => {
+// ─── Types ─────────────────────────────────────────────────────
+interface ChatItem {
+  id: string;
+  uuid: string;
+  vendor_id: number | null;
+  name: string;
+  avatar: string;
+  message: string;
+  time: string;
+  unread: number;
+}
 
+// ─── Main Screen ───────────────────────────────────────────────
+const ChatScreen = () => {
   const navigation = useNavigation<NavigationProp<any>>();
 
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [data, setData]           = useState<ChatItem[]>([]);
+  const [loading, setLoading]     = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   useLayoutEffect(() => {
@@ -303,191 +586,187 @@ const ChatScreen = () => {
     });
   }, [navigation]);
 
-  useEffect(() => {
-    getChatListData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getChatListData();
+      return () => {};
+    }, [])
+  );
 
-  const getChatListData = async () => {
+  // ── API Call ─────────────────────────────────────────────────
+  const getChatListData = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      isRefresh ? setRefreshing(true) : setLoading(true);
 
       const resp = await getChatListApi();
 
-      const conversations = resp?.data?.data?.conversations || [];
+      // API response: resp.data.data.conversations
+      const conversations = resp?.data?.conversations || [];
 
-      const formatted = conversations.map((item: any) => ({
-        id: item.uuid,
-        name: item.other_user?.name,
-        avatar: item.other_user?.image,
-        message: item.last_message,
-        time: moment(item.last_message_at).format("hh:mm A"),
-        unread: item.unread_count,
+      const formatted: ChatItem[] = conversations.map((item: any) => ({
+        id:        item.uuid,
+        uuid:      item.uuid,
+        vendor_id: item.other_user?.id ?? null,
+        name:      item.other_user?.name  ?? "Unknown",
+        avatar:    item.other_user?.image ?? "",
+        message:   item.last_message      ?? "No messages yet",
+        time:      item.last_message_at
+                     ? moment(item.last_message_at).format("hh:mm A")
+                     : "",
+        unread:    item.pivot?.unread_count ?? item.unread_count ?? 0,
       }));
 
       setData(formatted);
 
     } catch (err) {
-      console.log("Chat list error", err);
+      console.log("Chat list error:", err);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    getChatListData();
-  };
+  const onRefresh = () => getChatListData(true);
 
-  const handleDelete = (id: string) => {
-    const filtered = data.filter(item => item.id !== id);
-    setData(filtered);
-  };
+  // ── Delete (swipe) ───────────────────────────────────────────
+  const handleDelete = (id: string) =>
+    setData(prev => prev.filter(item => item.id !== id));
 
   const renderRightActions = (id: string) => (
-    <TouchableOpacity
-      style={styles.deleteAction}
-      onPress={() => handleDelete(id)}>
-      <Text style={{ color: "white" }}>Delete</Text>
+    <TouchableOpacity style={styles.deleteAction} onPress={() => handleDelete(id)}>
+      <Ionicons name="trash-outline" size={22} color="#fff" />
+      <Text style={styles.deleteText}>Delete</Text>
     </TouchableOpacity>
   );
 
-  const renderItem = ({ item }: any) => (
+  // ── Row ──────────────────────────────────────────────────────
+  const renderItem = ({ item }: { item: ChatItem }) => (
     <Swipeable renderRightActions={() => renderRightActions(item.id)}>
       <TouchableOpacity
         style={styles.row}
         activeOpacity={0.8}
-        onPress={() => navigation.navigate("MessageScreen", { item })}
+        onPress={() => navigation.navigate("MessageScreen", {
+          vendor_id: item.vendor_id,
+          uuid:      item.uuid,
+        })}
       >
-        <Image source={{ uri: item.avatar }} style={styles.avatar} />
+        {/* Avatar */}
+        {item.avatar ? (
+          <Image source={{ uri: item.avatar }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarFallback}>
+            <Text style={styles.avatarLetter}>
+              {item.name?.charAt(0)?.toUpperCase() ?? "?"}
+            </Text>
+          </View>
+        )}
 
+        {/* Name + Message */}
         <View style={styles.messageWrapper}>
-          <Text style={styles.nameText}>{item.name}</Text>
-          <Text style={styles.messageText} numberOfLines={1}>
-            {item.message}
-          </Text>
+          <Text style={styles.nameText} numberOfLines={1}>{item.name}</Text>
+          <Text style={styles.messageText} numberOfLines={1}>{item.message}</Text>
         </View>
 
-        <View style={{ alignItems: "flex-end" }}>
+        {/* Time + Unread badge */}
+        <View style={styles.rightCol}>
           <Text style={styles.timeText}>{item.time}</Text>
-
           {item.unread > 0 && (
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{item.unread}</Text>
+              <Text style={styles.badgeText}>
+                {item.unread > 99 ? "99+" : item.unread}
+              </Text>
             </View>
           )}
         </View>
-
       </TouchableOpacity>
     </Swipeable>
   );
 
+  // ── Empty state ──────────────────────────────────────────────
+  const ChatEmpty = () => (
+    <View style={styles.emptyWrap}>
+      <View style={styles.emptyIconCircle}>
+        <Ionicons name="chatbubble-ellipses-outline" size={42} color="#7a9e6e" />
+      </View>
+      <Text style={styles.emptyTitle}>No Conversations Yet</Text>
+      <Text style={styles.emptySubtitle}>
+        Start a conversation with a farmer{"\n"}to get fresh updates directly.
+      </Text>
+    </View>
+  );
+
+  // ── Loading ──────────────────────────────────────────────────
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#4a7c3f" />
       </View>
     );
   }
 
+  // ── Render ───────────────────────────────────────────────────
   return (
     <View style={styles.safeArea}>
-
       <FlatList
         data={data}
         keyExtractor={item => item.id}
         renderItem={renderItem}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#4a7c3f"]}        // Android
+            tintColor="#4a7c3f"          // iOS
+          />
         }
         ItemSeparatorComponent={() => <View style={styles.separator} />}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text>No Conversations</Text>
-          </View>
-        }
+        ListEmptyComponent={<ChatEmpty />}
+        showsVerticalScrollIndicator={false}
       />
-
     </View>
   );
 };
 
 export default ChatScreen;
 
-const styles = {
+// ─── Styles ────────────────────────────────────────────────────
+const styles = StyleSheet.create({
+  safeArea:       { flex: 1, backgroundColor: "#fff" },
 
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff"
+  // Row
+  row:            { flexDirection: "row", padding: 15, alignItems: "center", backgroundColor: "#fff" },
+  avatar:         { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
+  avatarFallback: {
+    width: 50, height: 50, borderRadius: 25, marginRight: 12,
+    backgroundColor: "#c8d9b8", alignItems: "center", justifyContent: "center",
   },
+  avatarLetter:   { fontSize: 20, fontWeight: "600", color: "#3d6b2a" },
+  messageWrapper: { flex: 1 },
+  nameText:       { fontSize: 15, fontWeight: "600", color: "#1a1a1a" },
+  messageText:    { color: "#888", marginTop: 3, fontSize: 13 },
+  rightCol:       { alignItems: "flex-end", gap: 5 },
+  timeText:       { fontSize: 11, color: "#bbb" },
 
-  row: {
-    flexDirection: "row",
-    padding: 15,
-    alignItems: "center"
+  // Badge
+  badge:          { backgroundColor: "#4a7c3f", borderRadius: 12, paddingHorizontal: 7, paddingVertical: 2, minWidth: 20, alignItems: "center" },
+  badgeText:      { color: "#fff", fontSize: 11, fontWeight: "600" },
+
+  separator: { height: 0.8, backgroundColor: "#f0f0f0", marginLeft: 77 },
+
+  // Delete action
+  deleteAction:   { backgroundColor: "#e53935", justifyContent: "center", alignItems: "center", width: 80, gap: 4 },
+  deleteText:     { color: "#fff", fontSize: 12, fontWeight: "500" },
+
+  // Loader
+  loader:         { flex: 1, justifyContent: "center", alignItems: "center" },
+
+  // Empty state
+  emptyWrap:      { alignItems: "center", justifyContent: "center", paddingTop: 100, paddingHorizontal: 40 },
+  emptyIconCircle: {
+    width: 90, height: 90, borderRadius: 45,
+    backgroundColor: "#eaf3e0", borderWidth: 1.5, borderColor: "#c5ddb4",
+    alignItems: "center", justifyContent: "center", marginBottom: 20,
   },
-
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12
-  },
-
-  messageWrapper: {
-    flex: 1
-  },
-
-  nameText: {
-    fontSize: 16,
-    fontWeight: "600"
-  },
-
-  messageText: {
-    color: "#777",
-    marginTop: 4
-  },
-
-  timeText: {
-    fontSize: 12,
-    color: "#999"
-  },
-
-  badge: {
-    backgroundColor: "#25D366",
-    borderRadius: 12,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginTop: 5
-  },
-
-  badgeText: {
-    color: "#fff",
-    fontSize: 12
-  },
-
-  separator: {
-    height: 1,
-    backgroundColor: "#eee",
-    marginLeft: 75
-  },
-
-  deleteAction: {
-    backgroundColor: "red",
-    justifyContent: "center",
-    alignItems: "center",
-    width: 80
-  },
-
-  loader: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center"
-  },
-
-  empty: {
-    marginTop: 100,
-    alignItems: "center"
-  }
-
-};
+  emptyTitle:     { fontSize: 18, fontWeight: "600", color: "#2c2c2c", marginBottom: 8, textAlign: "center" },
+  emptySubtitle:  { fontSize: 14, color: "#aaa", textAlign: "center", lineHeight: 22 },
+});

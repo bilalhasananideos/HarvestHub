@@ -403,10 +403,12 @@ const Home = ({navigation}: {navigation: any}) => {
              ]}
              pointerEvents={stickyHeaderVisible ? 'none' : 'auto'}
            >
+            <Pressable onPress={() => navigation.navigate('Profile')}>
              <CacheImage
-               url={user.image != null ? user.image : 'https://randomuser.me/api/portraits/men/1.jpg'}
+               url={user.image != null ? user.image : require('../../assets/images/profilefill.png')}
                style={styles.avatar}
              />
+             </Pressable>
              <View style={{ flex: 1, marginLeft: 10 }}>
                <Text numberOfLines={1} style={styles.headerTitleCompact}>Hello, {capitalize(user.name)}</Text>
                <Text style={styles.headerDateCompact}>{moment().format("ddd DD MMM")}</Text>
@@ -424,7 +426,7 @@ const Home = ({navigation}: {navigation: any}) => {
              </TouchableOpacity> */}
             <TouchableOpacity
                style={styles.cartBtn}
-               onPress={() => navigation.navigate('Notification')}
+               onPress={() => navigation.navigate('NotificationScreen')}
              >
                  <Image source={notification} style={styles.cartIconReal} />
              </TouchableOpacity>

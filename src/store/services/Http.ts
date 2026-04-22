@@ -64,3 +64,5 @@ export const get = (url: string, params = {}, headers: any = {}) => request('get
 export const post = (url: string, params = {}, headers: any = {}, formData: any = false) => request('post', url, params, headers, formData);
 
 export const deleting = (url: string, params = {}, headers: any = {}) => request('delete', url, params, headers);
+
+export const put = (url: string, params = {}, headers: any = {}) => request('put', url, params, headers);
